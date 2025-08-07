@@ -6,14 +6,15 @@ INFO:__main__:Set mphase:OK!
 INFO:__main__:Set mline:OK!
 INFO:__main__:Set wdiameter:OK!
 INFO:__main__:read_flash:OK!
-Motor_Version:1.7.3
+Motor_Version:1.
+INFO:__main__:7.3
 Motor_type:1
-Dead_Zone:180
-INFO:__main__:0
+Dead_Zone:1800
 Pulse_Line:11
 Pulse_Phase:30
+INFO:__main__:
 wheel_diameter:95.000
-INFO:__main__:P:0.100	 I:0.002	 D:0.010
+P:0.100	 I:0.002	 D:0.010
 INFO:__main__:Initialized motor parameters.
 INFO:__main__:$Battery:12.2V#
 INFO:__main__:

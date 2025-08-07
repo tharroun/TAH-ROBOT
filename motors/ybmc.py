@@ -65,15 +65,35 @@ class YBMC:
 # -----------------------------------
 
 # -----------------------------------
+
+# -----------------------------------
     def _listen_thread(self):
-        packet = ""
+        """
+This is the Thread function target that listens for messages on the 
+serial port. However it has a major problem using this interface to read 
+the encoder data.
+
+Using USART over USB:
+1. The format of the return data is inconsistant. 
+Some data follow the format $DATA#, but many do not.
+2. Turing on the encoder data means it is continuously transmitted, 
+and the docs say at 10ms intervals. The data does follow the $DATA# format.
+However, there is no way to time this correctly. As a result, using a 5 to 10ms
+delay between serial reads may cut off the end of the data string, and using 20 to 60ms
+delays may record two data strings in one.
+
+The Yahboom method is to use longer delays between reads, and then
+try and split the data if it was doubled up, and report the most recent.
+
+I am using a 10ms delay, and accepting the closing of the data string (a '#')
+may sometimes be missing, or in the next read. The idea is to then look for '$M' 
+which is unique to the encoder data. 
+
+All other data is shunted to log.
+        """
         while not self.stop_listening:
             if self.port.in_waiting > 0:
                 self.recv_buffer = self.port.read(self.port.in_waiting).decode().rstrip()
-                #messages = self.recv_buffer.split("#")
-                #self.recv_buffer = messages[-1]
-                #if len(messages) > 1:
-                #    print(messages[0] + "#")
                 if '$M' in self.recv_buffer:
                     print(self.recv_buffer)
                 else:
