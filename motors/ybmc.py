@@ -1,18 +1,25 @@
+#!/usr/bin/python3
+# coding=utf8
 import logging
-import struct
 import time
 import serial
 import threading
-from typing import List, Tuple
-import collections
-from enum import Enum
+import math
+from   enum import Enum
+from   enum import IntEnum
+import sys
+sys.path.append('/home/hiwonder/')
 
-class EncoderMode(Enum):
+class EncoderMode(IntEnum):
     NOTHING  = 0
     TOTAL    = 1
     REALTIME = 2
     SPEED    = 3
 
+class Robot(IntEnum):
+    WIDTH  = 476 # mm
+    LENGTH = 334 # mm
+    WHEEL_DIAMETER = 97 #mm
 
 class YBMC:
     """
@@ -20,7 +27,8 @@ class YBMC:
     """
 # -----------------------------------
     def __init__(
-        self, device: str = "/dev/ttyUSB0", 
+        self, 
+        device: str = "/dev/ttyUSB0", 
         enable_recv: bool = True,
         logfile: str = "YBMC.log"
     ):
@@ -29,14 +37,14 @@ class YBMC:
         logging.basicConfig(filename=logfile, filemode='w', level=logging.INFO)
 
         try:
-            self.port = serial.Serial(None)
+            self.port = serial.Serial(device)
             self.port.rts      = False
-            self.port.dts      = False      
+            self.port.dtr      = False      
             self.port.baudrate = 115200
             self.port.timeout  = 5
             self.port.stopbits = serial.STOPBITS_ONE
             self.port.bytesize = serial.EIGHTBITS
-            self.port.setPort(device)
+            #self.port.setPort(device)
             self.port.open()
             time.sleep(0.1)
             self.logger.info("Opened serial port.")
@@ -61,6 +69,13 @@ class YBMC:
         self.send_upload_command(EncoderMode.NOTHING)
         self.send_data("$read_flash#")
         self.logger.info("Initialized motor parameters.")
+
+        self.W = Robot.WIDTH//2
+        self.L = Robot.LENGTH//2
+        self.wheel_diameter = Robot.WHEEL_DIAMETER
+        self.velocity = 0
+        self.direction = 0
+        self.angular_rate = 0
         return
 # -----------------------------------
 
@@ -75,7 +90,7 @@ the encoder data.
 
 Using USART over USB:
 1. The format of the return data is inconsistant. 
-Some data follow the format $DATA#, but many do not.
+Some data follow the format '$DATA#', but many do not.
 2. Turing on the encoder data means it is continuously transmitted, 
 and the docs say at 10ms intervals. The data does follow the $DATA# format.
 However, there is no way to time this correctly. As a result, using a 5 to 10ms
@@ -181,6 +196,37 @@ All other data is shunted to log.
         return
 # -----------------------------------
 
+# -----------------------------------
+    def set_velocity(self, 
+                     velocity: float=0, 
+                     direction: float=90.0, 
+                     angular_rate: float=0):
+        """
+        Use polar coordinates to control moving
+        motor1 v1|  ↑  |v2 motor2
+                 |     |
+        motor3 v3|     |v4 motor4
+        :param velocity: mm/s
+        :param direction: Moving direction 0~360deg, 180deg<--- ↑ ---> 0deg
+        :param angular_rate:  The speed at which the chassis rotates
+        :return:
+        """
+        rad_per_deg = math.pi / 180.0
+        vx = velocity * math.cos(direction * rad_per_deg)
+        vy = velocity * math.sin(direction * rad_per_deg)
+        vp = -angular_rate * (self.W + self.L)
+        v1 = int(vx - vy - vp)
+        v2 = int(vx + vy + vp)
+        v3 = int(vx + vy - vp)
+        v4 = int(vx - vy + vp)
+        self.control_pwm(v1, v2, v3, v4)
+        self.velocity     = velocity
+        self.direction    = direction
+        self.angular_rate = angular_rate
+        return
+# -----------------------------------
+# -----------------------------------
+
 if __name__ == "__main__":
 
     ybmc = YBMC()
@@ -191,6 +237,16 @@ if __name__ == "__main__":
     ybmc.send_upload_command(EncoderMode.SPEED)
     time.sleep(2)
     ybmc.control_pwm(0, 0, 0, 0)
+    ybmc.send_upload_command(EncoderMode.NOTHING)
     time.sleep(0.5)
 
+    ybmc.set_velocity(10.0, 0.0, 0.0)
+    time.sleep(1)
+    ybmc.set_velocity(10.0, 90.0, 0.0)
+    time.sleep(1)
+    ybmc.set_velocity(10.0, 0.0, 20.0)
+    time.sleep(1)
+    ybmc.control_pwm(0, 0, 0, 0)
+    time.sleep(0.5)
+    
     ybmc.stopYBMC()
