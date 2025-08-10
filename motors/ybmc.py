@@ -37,14 +37,14 @@ class YBMC:
         logging.basicConfig(filename=logfile, filemode='w', level=logging.INFO)
 
         try:
-            self.port = serial.Serial(device)
+            self.port = serial.Serial(None)
             self.port.rts      = False
             self.port.dtr      = False      
             self.port.baudrate = 115200
             self.port.timeout  = 5
             self.port.stopbits = serial.STOPBITS_ONE
             self.port.bytesize = serial.EIGHTBITS
-            #self.port.setPort(device)
+            self.port.setPort(device)
             self.port.open()
             time.sleep(0.1)
             self.logger.info("Opened serial port.")
@@ -60,7 +60,7 @@ class YBMC:
             self.logger.info("Started listening to serial port.")
 
         self.set_motor_type(1)
-        self.set_motor_deadzone(1800)
+        self.set_motor_deadzone(1500)
         self.set_pulse_phase(30)
         self.set_pulse_line(11)
         self.set_wheel_diam(95)
@@ -203,21 +203,21 @@ All other data is shunted to log.
                      angular_rate: float=0):
         """
         Use polar coordinates to control moving
-        motor1 v1|  ↑  |v2 motor2
+        motor1 v1|  ↑  |v2 motor3
                  |     |
-        motor3 v3|     |v4 motor4
+        motor3 v2|     |v4 motor4
         :param velocity: mm/s
-        :param direction: Moving direction 0~360deg, 180deg<--- ↑ ---> 0deg
+        :param direction: Moving direction 0~360deg, 90deg<--- ↑ ---> 270deg
         :param angular_rate:  The speed at which the chassis rotates
         :return:
         """
         rad_per_deg = math.pi / 180.0
         vx = velocity * math.cos(direction * rad_per_deg)
         vy = velocity * math.sin(direction * rad_per_deg)
-        vp = -angular_rate * (self.W + self.L)
+        vp = -angular_rate # * (self.W + self.L)
         v1 = int(vx - vy - vp)
-        v2 = int(vx + vy + vp)
-        v3 = int(vx + vy - vp)
+        v2 = int(vx + vy - vp)
+        v3 = int(vx + vy + vp)
         v4 = int(vx - vy + vp)
         self.control_pwm(v1, v2, v3, v4)
         self.velocity     = velocity
@@ -232,20 +232,29 @@ if __name__ == "__main__":
     ybmc = YBMC()
     ybmc.get_battery()
 
-    ybmc.control_pwm(100, 100, 100, 100)
+    '''
+    ybmc.control_pwm(10, 10, -10, -10) #rotate cw
     time.sleep(2)
-    ybmc.send_upload_command(EncoderMode.SPEED)
+    ybmc.control_pwm(-10, -10, 10, 10) #rotate ccw
     time.sleep(2)
+    ybmc.control_pwm(10, -10, -10, 10) # 270 deg
+    time.sleep(2)
+    ybmc.control_pwm(-10, 10, 10, -10) # 90 deg
+    time.sleep(2)
+    #ybmc.send_upload_command(EncoderMode.SPEED)
     ybmc.control_pwm(0, 0, 0, 0)
-    ybmc.send_upload_command(EncoderMode.NOTHING)
+    #ybmc.send_upload_command(EncoderMode.NOTHING)
     time.sleep(0.5)
-
-    ybmc.set_velocity(10.0, 0.0, 0.0)
-    time.sleep(1)
-    ybmc.set_velocity(10.0, 90.0, 0.0)
-    time.sleep(1)
-    ybmc.set_velocity(10.0, 0.0, 20.0)
-    time.sleep(1)
+    '''
+    
+    #ybmc.set_velocity(50.0, 90.0, 0.0)
+    #time.sleep(2)
+    #ybmc.set_velocity(850.0, 120.0, 0.0)
+    #time.sleep(2)
+    ybmc.set_velocity(0.0, 0.0, 800)
+    time.sleep(2)
+    ybmc.set_velocity(0.0, 0.0, -800)
+    time.sleep(2)
     ybmc.control_pwm(0, 0, 0, 0)
     time.sleep(0.5)
     
