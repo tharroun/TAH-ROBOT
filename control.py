@@ -86,6 +86,14 @@ class RobotControlApp(QMainWindow):
         # Add stretch to push buttons to top
         main_layout.addStretch()
     
+            
+    def closeEvent(self, event):
+        # do stuff
+        print("Closing")
+        self.robot_stop()
+        event.accept() # let the window close
+
+
     def robot_go(self):
         """Function called when Go button is pressed"""
         print("Robot Go command executed!")
