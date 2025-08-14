@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 # coding=utf8
+import sys
+sys.path.append('/home/tah/Github/TAH-ROBOT')
 import logging
 import time
 import serial
@@ -7,8 +9,7 @@ import threading
 import math
 from   enum import Enum
 from   enum import IntEnum
-import sys
-sys.path.append('/home/hiwonder/')
+
 
 class EncoderMode(IntEnum):
     NOTHING  = 0
@@ -219,7 +220,7 @@ All other data is shunted to log.
         v2 = int(vx + vy - vp)
         v3 = int(vx + vy + vp)
         v4 = int(vx - vy + vp)
-        self.control_pwm(v1, v2, v3, v4)
+        self.control_pwm(v2, -v4, -v1, v3)
         self.velocity     = velocity
         self.direction    = direction
         self.angular_rate = angular_rate
@@ -232,26 +233,18 @@ if __name__ == "__main__":
     ybmc = YBMC()
     ybmc.get_battery()
 
-    '''
-    ybmc.control_pwm(10, 10, -10, -10) #rotate cw
-    time.sleep(2)
-    ybmc.control_pwm(-10, -10, 10, 10) #rotate ccw
-    time.sleep(2)
-    ybmc.control_pwm(10, -10, -10, 10) # 270 deg
-    time.sleep(2)
-    ybmc.control_pwm(-10, 10, 10, -10) # 90 deg
-    time.sleep(2)
-    #ybmc.send_upload_command(EncoderMode.SPEED)
-    ybmc.control_pwm(0, 0, 0, 0)
-    #ybmc.send_upload_command(EncoderMode.NOTHING)
-    time.sleep(0.5)
-    '''
     
-    #ybmc.set_velocity(50.0, 90.0, 0.0)
+    #ybmc.control_pwm(0, 0, 0, 500) #rotate cw
     #time.sleep(2)
-    #ybmc.set_velocity(850.0, 120.0, 0.0)
-    #time.sleep(2)
-    ybmc.set_velocity(0.0, 0.0, 800)
+    #ybmc.control_pwm(0, 0, 0, 0)
+
+    
+    ybmc.send_upload_command(EncoderMode.SPEED)
+    ybmc.set_velocity(350.0, 0.0, 0.0)
+    time.sleep(2)
+    ybmc.set_velocity(850.0, 180.0, 0.0)
+    time.sleep(2)
+    ybmc.set_velocity(0.0, 0.0, 300)
     time.sleep(2)
     ybmc.set_velocity(0.0, 0.0, -800)
     time.sleep(2)

@@ -1,12 +1,22 @@
 #!/usr/bin/env python3
-
+# coding=utf8
 import sys
+sys.path.append('/home/tah/Github/TAH-ROBOT')
+sys.path.append('/home/tah/Github/TAH-ROBOT/motors')
+
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QDial, QLabel
 from PyQt6.QtCore import Qt
+
+import ybmc
 
 class RobotControlApp(QMainWindow):
     def __init__(self):
         super().__init__()
+        
+        self.ybmc = ybmc.YBMC()
+        self.ybmc.get_battery()
+
+        
         self.setWindowTitle("Robot Control")
         self.setGeometry(100, 100, 400, 250)
         
@@ -91,24 +101,30 @@ class RobotControlApp(QMainWindow):
         # do stuff
         print("Closing")
         self.robot_stop()
+        self.ybmc.stopYBMC()
         event.accept() # let the window close
-
 
     def robot_go(self):
         """Function called when Go button is pressed"""
-        print("Robot Go command executed!")
-        # Add your robot go logic here
+        self.ybmc.set_velocity(float(self.speed_dial.value()), 
+                               float(self.direction_dial.value()), 
+                               0.0)
         
     def robot_stop(self):
         """Function called when Stop button is pressed"""
-        print("Robot Stop command executed!")
-        # Add your robot stop logic here
-        self.speed_dial.setValue(0)
+        self.ybmc.control_pwm(0,0,0,0)
+        #self.speed_dial.setValue(0)
     
     def direction_value_changed(self, i):
+        self.ybmc.set_velocity(float(self.speed_dial.value()), 
+                               float(i), 
+                               0.0)
         self.direction_value.setText(f"{i}")
 
     def speed_value_changed(self, i):
+        self.ybmc.set_velocity(float(i), 
+                               float(self.direction_dial.value()), 
+                               0.0)
         self.speed_value.setText(f"{i}")
 
 def main():
