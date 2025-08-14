@@ -95,6 +95,8 @@ class RobotControlApp(QMainWindow):
 
         # Add stretch to push buttons to top
         main_layout.addStretch()
+
+        self.is_running = False
     
             
     def closeEvent(self, event):
@@ -109,22 +111,26 @@ class RobotControlApp(QMainWindow):
         self.ybmc.set_velocity(float(self.speed_dial.value()), 
                                float(self.direction_dial.value()), 
                                0.0)
+        self.is_running = True
         
     def robot_stop(self):
         """Function called when Stop button is pressed"""
         self.ybmc.control_pwm(0,0,0,0)
+        self.is_running = False
         #self.speed_dial.setValue(0)
     
     def direction_value_changed(self, i):
-        self.ybmc.set_velocity(float(self.speed_dial.value()), 
-                               float(i), 
-                               0.0)
+        if self.is_running:
+            self.ybmc.set_velocity(float(self.speed_dial.value()), 
+                                   float(i), 
+                                   0.0)
         self.direction_value.setText(f"{i}")
 
     def speed_value_changed(self, i):
-        self.ybmc.set_velocity(float(i), 
-                               float(self.direction_dial.value()), 
-                               0.0)
+        if self.is_running:
+            self.ybmc.set_velocity(float(i), 
+                                   float(self.direction_dial.value()), 
+                                   0.0)
         self.speed_value.setText(f"{i}")
 
 def main():
