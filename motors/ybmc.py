@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding=utf8
 import sys
-sys.path.append('/home/tah/Github/TAH-ROBOT')
+sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 import logging
 import time
 import serial

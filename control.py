@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # coding=utf8
 import sys
-sys.path.append('/home/tah/Github/TAH-ROBOT')
-sys.path.append('/home/tah/Github/TAH-ROBOT/motors')
+sys.path.append('/home/tah/GitHub/TAH-ROBOT')
+sys.path.append('/home/tah/GitHub/TAH-ROBOT/motors')
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QDial, QLabel
 from PyQt6.QtCore import Qt
