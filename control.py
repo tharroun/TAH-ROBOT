@@ -158,9 +158,9 @@ class RobotControlApp(QMainWindow):
         str = self.ybmc.get_battery()
         try:
             val = float(str[:-1])
-            if val < 9.9 :
+            if val < 9.8 :
                 self.battery_motor_value.setStyleSheet('QLabel {background-color: #EA1A1A; color: black;}')
-            elif val >= 9.9 and val < 11.8 :
+            elif val >= 9.8 and val < 11.8 :
                 self.battery_motor_value.setStyleSheet('QLabel {background-color: #EAF523; color: black;}')
             else :
                 self.battery_motor_value.setStyleSheet('QLabel {background-color: #21ED1A; color: black;}')
@@ -196,6 +196,7 @@ class RobotControlApp(QMainWindow):
                                    float(i), 
                                    float(self.spin_dial.value()))
         self.direction_value.setText(f"{i}")
+        self.get_batteries()
 
     def speed_value_changed(self, i):
         if self.is_running:
@@ -203,6 +204,7 @@ class RobotControlApp(QMainWindow):
                                    float(self.direction_dial.value()), 
                                    float(self.spin_dial.value()))
         self.speed_value.setText(f"{i}")
+        self.get_batteries()
     
     def spin_value_changed(self, i):
         if self.is_running:
@@ -210,6 +212,7 @@ class RobotControlApp(QMainWindow):
                                    float(self.direction_dial.value()), 
                                    float(i))
         self.spin_value.setText(f"{i}")
+        self.get_batteries()
     
     def robot_stop_spin(self, i):
         if self.is_running:
