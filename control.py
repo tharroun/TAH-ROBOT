@@ -3,6 +3,7 @@
 import sys
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/motors')
+import subprocess
 
 from PyQt6.QtWidgets import (
     QApplication, 
@@ -127,7 +128,7 @@ class RobotControlApp(QMainWindow):
         #-------------------------------------
 
         #-------------------------------------
-        # Creat battery row
+        # Creat motor battery row
         battery_layout = QHBoxLayout()
         self.battery_motor_title = QLabel("Motor battery")
         self.battery_motor_title.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
@@ -137,6 +138,19 @@ class RobotControlApp(QMainWindow):
         battery_layout.addWidget(self.battery_motor_title)
         battery_layout.addWidget(self.battery_motor_value)
         main_layout.addLayout(battery_layout)
+        #-------------------------------------
+
+        #-------------------------------------
+        # Creat raspi battery row
+        raspi_layout = QHBoxLayout()
+        self.raspi_motor_title = QLabel("RPi5 supply")
+        self.raspi_motor_title.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        self.raspi_motor_value = QLabel("0.0V")
+        self.raspi_motor_value.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        self.raspimotor_value_style = self.raspi_motor_value.styleSheet()
+        raspi_layout.addWidget(self.raspi_motor_title)
+        raspi_layout.addWidget(self.raspi_motor_value)
+        main_layout.addLayout(raspi_layout)
         #-------------------------------------
 
         # Add stretch to push buttons to top
@@ -164,11 +178,26 @@ class RobotControlApp(QMainWindow):
                 self.battery_motor_value.setStyleSheet('QLabel {background-color: #EAF523; color: black;}')
             else :
                 self.battery_motor_value.setStyleSheet('QLabel {background-color: #21ED1A; color: black;}')
-
         except:
             self.battery_motor_value.setStyleSheet(self.battery_motor_value_style)
             pass
         self.battery_motor_value.setText(str)
+
+        str = subprocess.run(['vcgencmd','pmic_read_adc','EXT5V_V'],capture_output=True).stdout.decode()
+        str = str[22:28]
+        try:
+            val = float(str)
+            if val < 4.7 :
+                self.raspi_motor_value.setStyleSheet('QLabel {background-color: #EA1A1A; color: black;}')
+            elif val >= 4.7 and val < 4.9 :
+                self.raspi_motor_value.setStyleSheet('QLabel {background-color: #EAF523; color: black;}')
+            else :
+                self.raspi_motor_value.setStyleSheet('QLabel {background-color: #21ED1A; color: black;}')
+        except:
+            str = 'Err'
+            self.raspi_motor_value.setStyleSheet(self.battery_motor_value_style)
+            pass
+        self.raspi_motor_value.setText(str+'V')
         return
 
     def robot_go(self):
