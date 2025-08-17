@@ -4,8 +4,19 @@ import sys
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/motors')
 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QDial, QLabel
+from PyQt6.QtWidgets import (
+    QApplication, 
+    QMainWindow, 
+    QWidget, 
+    QVBoxLayout, 
+    QHBoxLayout, 
+    QGridLayout, 
+    QPushButton, 
+    QDial, 
+    QLabel,
+)
 from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QCloseEvent
 
 import ybmc
 
@@ -29,7 +40,7 @@ class RobotControlApp(QMainWindow):
         central_widget.setLayout(main_layout)
         
         #--------------------------------------
-        # Create horizontal layout for buttons
+        # Create horizontal layout for go/stop buttons
         button_layout = QHBoxLayout()
         
         # Create Go button
@@ -51,7 +62,7 @@ class RobotControlApp(QMainWindow):
         #-------------------------------------
 
         #--------------------------------------
-        # Create grid layout for buttons
+        # Create grid layout for speed and direction control
         speed_layout = QGridLayout()
         
         # Create Direction dial
@@ -63,6 +74,7 @@ class RobotControlApp(QMainWindow):
         self.direction_dial.setSingleStep(20)
         self.direction_dial.setNotchesVisible(True)
         self.direction_dial.setTracking(False)
+        self.direction_dial.setMinimumHeight(80)
         self.direction_dial.valueChanged.connect(self.direction_value_changed)
         self.direction_value = QLabel("0")
         self.direction_value.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
@@ -77,6 +89,7 @@ class RobotControlApp(QMainWindow):
         self.speed_dial.setSingleStep(20)
         self.speed_dial.setNotchesVisible(True)
         self.speed_dial.setTracking(False)
+        self.speed_dial.setMinimumHeight(80)
         self.speed_dial.valueChanged.connect(self.speed_value_changed)
         self.speed_value = QLabel("0")
         self.speed_value.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
@@ -91,7 +104,30 @@ class RobotControlApp(QMainWindow):
         
         # Add button layout to main layout
         main_layout.addLayout(speed_layout)
-         #-------------------------------------
+        #-------------------------------------
+
+        #-------------------------------------
+        spin_layout = QHBoxLayout()
+        self.spin_value = QLabel(f"Spin: {0}")
+        self.spin_value.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        self.spin_dial = QDial()
+        self.spin_dial.setRange(-1000, 1000)
+        self.spin_dial.setWrapping(False)
+        self.spin_dial.setSingleStep(20)
+        self.spin_dial.setNotchesVisible(True)
+        self.spin_dial.setTracking(False)
+        self.spin_dial.setMinimumHeight(80)
+        self.spin_dial.valueChanged.connect(self.spin_value_changed)
+        self.spin_button = QPushButton("Stop spin")
+        self.spin_button.clicked.connect(self.robot_stop_spin)
+        self.spin_button.setMinimumHeight(40)
+
+        spin_layout.addWidget(self.spin_value)
+        spin_layout.addWidget(self.spin_dial)
+        spin_layout.addWidget(self.spin_button)
+        main_layout.addLayout(spin_layout)
+
+        #-------------------------------------
 
         # Add stretch to push buttons to top
         main_layout.addStretch()
@@ -99,7 +135,7 @@ class RobotControlApp(QMainWindow):
         self.is_running = False
     
             
-    def closeEvent(self, event):
+    def closeEvent(self, event: QCloseEvent):
         # do stuff
         print("Closing")
         self.robot_stop()
@@ -132,6 +168,21 @@ class RobotControlApp(QMainWindow):
                                    float(self.direction_dial.value()), 
                                    0.0)
         self.speed_value.setText(f"{i}")
+    
+    def spin_value_changed(self, i):
+        if self.is_running:
+            self.ybmc.set_velocity(float(self.speed_dial.value()), 
+                                   float(self.direction_dial.value()), 
+                                   float(i))
+        self.spin_value.setText(f"Spin: {i}")
+    
+    def robot_stop_spin(self, i):
+        if self.is_running:
+            self.ybmc.set_velocity(float(self.speed_dial.value()), 
+                                   float(self.direction_dial.value()), 
+                                   0)
+        self.spin_dial.setValue(0)
+        self.spin_value.setText(f"Spin: {0}")
 
 def main():
     app = QApplication(sys.argv)

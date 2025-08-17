@@ -7,15 +7,15 @@ INFO:ybmc:Set mphase:OK!
 INFO:ybmc:Set mline:OK!
 INFO:ybmc:Set wdiameter:OK!
 INFO:ybmc:read_flash:OK!
-Motor_Version:1.7.3
+Motor_Version:1.
+INFO:ybmc:7.3
 Motor_type:1
-Dead_Zone:150
-INFO:ybmc:0
+Dead_Zone:1500
 Pulse_Line:11
 Pulse_Phase:30
 INFO:ybmc:
 wheel_diameter:95.000
-INFO:ybmc:P:0.100	 I:0.002	 D:0.010
+P:0.100	 I:0.002	 D:0.010
 INFO:ybmc:Initialized motor parameters.
 INFO:ybmc:$Battery:12.5V#
 INFO:ybmc:Stopped listening thread.
