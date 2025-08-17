@@ -1,6 +1,5 @@
 INFO:ybmc:Opened serial port.
 INFO:ybmc:Started listening to serial port.
-INFO:ybmc:Motor_Version:1.7.3
 INFO:ybmc:Set mtype:OK!
 INFO:ybmc:Set deadzone:OK!
 INFO:ybmc:Set mphase:OK!
@@ -17,6 +16,5 @@ INFO:ybmc:
 wheel_diameter:95.000
 P:0.100	 I:0.002	 D:0.010
 INFO:ybmc:Initialized motor parameters.
-INFO:ybmc:$Battery:12.5V#
 INFO:ybmc:Stopped listening thread.
 INFO:ybmc:Closed serial port.

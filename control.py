@@ -25,8 +25,6 @@ class RobotControlApp(QMainWindow):
         super().__init__()
         
         self.ybmc = ybmc.YBMC()
-        self.ybmc.get_battery()
-
         
         self.setWindowTitle("Robot Control")
         self.setGeometry(100, 100, 500, 400)
@@ -114,7 +112,6 @@ class RobotControlApp(QMainWindow):
         self.spin_value = QLabel("0")
         self.spin_value.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
 
-
         # Add dials to grid layout
         speed_layout.addWidget(self.direction_title,0,0)
         speed_layout.addWidget(self.speed_title,    0,1)
@@ -129,18 +126,50 @@ class RobotControlApp(QMainWindow):
         main_layout.addLayout(speed_layout)
         #-------------------------------------
 
+        #-------------------------------------
+        # Creat battery row
+        battery_layout = QHBoxLayout()
+        self.battery_motor_title = QLabel("Motor battery")
+        self.battery_motor_title.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        self.battery_motor_value = QLabel("0.0V")
+        self.battery_motor_value.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        self.battery_motor_value_style = self.battery_motor_value.styleSheet()
+        battery_layout.addWidget(self.battery_motor_title)
+        battery_layout.addWidget(self.battery_motor_value)
+        main_layout.addLayout(battery_layout)
+        #-------------------------------------
+
         # Add stretch to push buttons to top
         main_layout.addStretch()
 
+        self.get_batteries()
         self.is_running = False
     
             
     def closeEvent(self, event: QCloseEvent):
-        # do stuff
         print("Closing")
         self.robot_stop()
         self.ybmc.stopYBMC()
         event.accept() # let the window close
+        return
+
+    def get_batteries(self):
+        # MOTOR BATTRY
+        str = self.ybmc.get_battery()
+        try:
+            val = float(str[:-1])
+            if val < 9.9 :
+                self.battery_motor_value.setStyleSheet('QLabel {background-color: #EA1A1A; color: black;}')
+            elif val >= 9.9 and val < 11.8 :
+                self.battery_motor_value.setStyleSheet('QLabel {background-color: #EAF523; color: black;}')
+            else :
+                self.battery_motor_value.setStyleSheet('QLabel {background-color: #21ED1A; color: black;}')
+
+        except:
+            self.battery_motor_value.setStyleSheet(self.battery_motor_value_style)
+            pass
+        self.battery_motor_value.setText(str)
+        return
 
     def robot_go(self):
         """Function called when Go button is pressed"""
@@ -149,6 +178,8 @@ class RobotControlApp(QMainWindow):
                                float(self.spin_dial.value()))
         self.is_running = True
         self.go_button.setStyleSheet('QPushButton {background-color: #21ED1A; color: black;}')
+        self.go_button.setText("Running")
+        self.get_batteries()
         
     def robot_stop(self):
         """Function called when Stop button is pressed"""
@@ -156,6 +187,8 @@ class RobotControlApp(QMainWindow):
         self.is_running = False
         #self.speed_dial.setValue(0)
         self.go_button.setStyleSheet(self.go_style)
+        self.go_button.setText("Go")
+        self.get_batteries()
     
     def direction_value_changed(self, i):
         if self.is_running:
@@ -185,6 +218,7 @@ class RobotControlApp(QMainWindow):
                                    0)
         self.spin_dial.setValue(0)
         self.spin_value.setText(f"{0}")
+        self.get_batteries()
 
 def main():
     app = QApplication(sys.argv)

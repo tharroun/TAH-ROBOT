@@ -7,6 +7,7 @@ import time
 import serial
 import threading
 import math
+import collections
 from   enum import Enum
 from   enum import IntEnum
 
@@ -18,8 +19,8 @@ class EncoderMode(IntEnum):
     SPEED    = 3
 
 class Robot(IntEnum):
-    WIDTH  = 476 # mm
-    LENGTH = 334 # mm
+    WIDTH          = 476 # mm
+    LENGTH         = 334 # mm
     WHEEL_DIAMETER = 97 #mm
 
 class YBMC:
@@ -38,15 +39,13 @@ class YBMC:
         logging.basicConfig(filename=logfile, filemode='w', level=logging.INFO)
 
         try:
-            self.port = serial.Serial(None)
+            self.port = serial.Serial(device)
             self.port.rts      = False
             self.port.dtr      = False      
             self.port.baudrate = 115200
             self.port.timeout  = 5
             self.port.stopbits = serial.STOPBITS_ONE
             self.port.bytesize = serial.EIGHTBITS
-            self.port.setPort(device)
-            self.port.open()
             time.sleep(0.1)
             self.logger.info("Opened serial port.")
         except serial.SerialException as e:
@@ -58,6 +57,8 @@ class YBMC:
             self.listening      = threading.Thread(target=self._listen_thread, daemon=False)
             self.listening.start()
             self.recv_buffer    = ""
+            self.queue_battery  = collections.deque(maxlen=1)
+            self.queue_battery.append('Unk')
             self.logger.info("Started listening to serial port.")
 
         self.set_motor_type(1)
@@ -110,8 +111,16 @@ All other data is shunted to log.
         while not self.stop_listening:
             if self.port.in_waiting > 0:
                 self.recv_buffer = self.port.read(self.port.in_waiting).decode().rstrip()
-                if '$M' in self.recv_buffer:
+                if self.recv_buffer.startswith('$M'):
                     print(self.recv_buffer)
+                elif self.recv_buffer.startswith('$B'):
+                    try:
+                        start = self.recv_buffer.index( ':' ) + 1
+                        end   = self.recv_buffer.index( '#', start )
+                        self.queue_battery.append(self.recv_buffer[start:end])
+                    except ValueError:
+                        self.logger.info("Cannot parse battery information.")
+                        self.queue_battery.append('Err')
                 else:
                     self.logger.info(self.recv_buffer)
             else:
@@ -131,6 +140,12 @@ All other data is shunted to log.
             self.logger.warning(f"Reception was not enabled to stop the listening thread.")
         self.port.close()
         self.logger.info("Closed serial port.")
+        return
+# -----------------------------------
+
+# -----------------------------------
+    def get_flash(self):
+        self.send_data("$read_flash#")
         return
 # -----------------------------------
 
@@ -174,9 +189,10 @@ All other data is shunted to log.
 # -----------------------------------
 
 # -----------------------------------
-    def get_battery(self):
+    def get_battery(self) -> str :
         self.send_data("$read_vol#")
-        return
+        time.sleep(0.2)
+        return self.queue_battery[0]
 # -----------------------------------
 
 # -----------------------------------
@@ -231,7 +247,7 @@ All other data is shunted to log.
 if __name__ == "__main__":
 
     ybmc = YBMC()
-    ybmc.get_battery()
+    print(ybmc.get_battery())
 
     
     #ybmc.control_pwm(0, 0, 0, 500) #rotate cw
