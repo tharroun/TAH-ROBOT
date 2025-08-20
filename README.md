@@ -1,15 +1,27 @@
 # TAH-ROBOT
+
+## Servo control
+We are using the Adafruit library for the MZ996R servos on the PCA9685 16-channel board
+```
+cd TAH-ROBOT
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install adafruit-circuitpython-pca9685
+pip3 install lgpio
+pip3 install adafruit-circuitpython-motor
+```
+
 ## To-do list
 
 ### Construction
 - Add the super-structure and cover
-- Attach the pan-tile servo to the super-structure
+- Add mmounting bracket for the touch screen
+- Attach the pan-tilt servo to the super-structure
 - What is the deadtime for the 520 motor?
 
 ### Programming
 - Control program
-    - Remove the logger and add a text window to show messages
-    - Add a battery check button and text field 
+    - Remove the logger and add a text window to show messages 
     - Add a button and label to monitor wheel speeds
     - Include a PID control adjustment tool
 - Motor control
