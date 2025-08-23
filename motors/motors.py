@@ -18,12 +18,12 @@ class EncoderMode(IntEnum):
     REALTIME = 2
     SPEED    = 3
 
-class Robot(IntEnum):
+class RobotFrame(IntEnum):
     WIDTH          = 476 # mm
     LENGTH         = 334 # mm
     WHEEL_DIAMETER = 97 #mm
 
-class YBMC:
+class Motors:
     """
     The Yahboom 4-Channel Motor Controller
     """
@@ -32,7 +32,7 @@ class YBMC:
         self, 
         device: str = "/dev/ttyUSB0", 
         enable_recv: bool = True,
-        logfile: str = "YBMC.log"
+        logfile: str = "motors.log"
     ):
 
         self.logger = logging.getLogger(__name__)
@@ -72,9 +72,9 @@ class YBMC:
         self.send_data("$read_flash#")
         self.logger.info("Initialized motor parameters.")
 
-        self.W = Robot.WIDTH//2
-        self.L = Robot.LENGTH//2
-        self.wheel_diameter = Robot.WHEEL_DIAMETER
+        self.W = RobotFrame.WIDTH//2
+        self.L = RobotFrame.LENGTH//2
+        self.wheel_diameter = RobotFrame.WHEEL_DIAMETER
         self.velocity = 0
         self.direction = 0
         self.angular_rate = 0
@@ -129,7 +129,7 @@ All other data is shunted to log.
 # -----------------------------------
 
 # -----------------------------------
-    def stopYBMC(self):
+    def deinit(self):
         self.send_upload_command(EncoderMode.NOTHING)
         if self.enable_recv:
             self.stop_listening = True
@@ -214,10 +214,16 @@ All other data is shunted to log.
 # -----------------------------------
 
 # -----------------------------------
-    def set_velocity(self, 
-                     velocity: float=0, 
-                     direction: float=90.0, 
-                     angular_rate: float=0):
+    def stop(self):
+        self.send_data("$pwm:0,0,0,0#")
+        return
+# -----------------------------------
+
+# -----------------------------------
+    def go(self, 
+           velocity: float=0, 
+           direction: float=90.0, 
+           angular_rate: float=0):
         """
         Use polar coordinates to control moving
         motor1 v1|  ↑  |v2 motor3
@@ -246,8 +252,8 @@ All other data is shunted to log.
 
 if __name__ == "__main__":
 
-    ybmc = YBMC()
-    print(ybmc.get_battery())
+    motors = Motors()
+    print(motors.get_battery())
 
     
     #ybmc.control_pwm(0, 0, 0, 500) #rotate cw
@@ -255,16 +261,16 @@ if __name__ == "__main__":
     #ybmc.control_pwm(0, 0, 0, 0)
 
     
-    ybmc.send_upload_command(EncoderMode.SPEED)
-    ybmc.set_velocity(350.0, 0.0, 0.0)
+    motors.send_upload_command(EncoderMode.SPEED)
+    motors.go(350.0, 0.0, 0.0)
     time.sleep(2)
-    ybmc.set_velocity(850.0, 180.0, 0.0)
+    motors.go(850.0, 180.0, 0.0)
     time.sleep(2)
-    ybmc.set_velocity(0.0, 0.0, 300)
+    motors.go(0.0, 0.0, 300)
     time.sleep(2)
-    ybmc.set_velocity(0.0, 0.0, -800)
+    motors.go(0.0, 0.0, -800)
     time.sleep(2)
-    ybmc.control_pwm(0, 0, 0, 0)
+    motors.stop()
     time.sleep(0.5)
     
-    ybmc.stopYBMC()
+    motors.deinit()
