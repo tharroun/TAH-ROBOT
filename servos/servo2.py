@@ -38,7 +38,7 @@ fraction = 0.0
 while fraction < 1.0:
     servo0.fraction = fraction
     servo2.fraction = fraction
-    fraction += 0.01
+    fraction += 0.05
     time.sleep(0.03)
 
 pca.channels[0].duty_cycle = 0
