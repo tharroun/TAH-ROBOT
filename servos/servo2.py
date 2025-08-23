@@ -12,7 +12,7 @@ pca.frequency = 50
 # To get the full range of the servo you will likely need to adjust the min_pulse and max_pulse to
 # match the stall points of the servo.
 servo0 = servo.Servo(pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range=180)
-servo2 = servo.Servo(pca.channels[2], min_pulse=500, max_pulse=2500, actuation_range=180)
+servo2 = servo.Servo(pca.channels[1], min_pulse=500, max_pulse=2500, actuation_range=180)
 
 # Reset the motor to a start position with a pause
 # otherwise there is sometimes an IO error.
@@ -43,5 +43,6 @@ while fraction < 1.0:
 
 pca.channels[0].duty_cycle = 0
 pca.channels[2].duty_cycle = 0
+pca.deinit()
 i2c.unlock()
 i2c.deinit()
