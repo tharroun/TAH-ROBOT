@@ -3,6 +3,7 @@
 import sys
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/motors')
+from motors import Motors
 import subprocess
 
 from PyQt6.QtWidgets import (
@@ -19,13 +20,12 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QCloseEvent
 
-import ybmc
 
 class RobotControlApp(QMainWindow):
     def __init__(self):
         super().__init__()
         
-        self.ybmc = ybmc.YBMC()
+        self.ybmc = Motors()
         
         self.setWindowTitle("Robot Control")
         self.setGeometry(100, 100, 500, 400)
@@ -163,7 +163,7 @@ class RobotControlApp(QMainWindow):
     def closeEvent(self, event: QCloseEvent):
         print("Closing")
         self.robot_stop()
-        self.ybmc.stopYBMC()
+        self.ybmc.deinit()
         event.accept() # let the window close
         return
 
@@ -202,9 +202,9 @@ class RobotControlApp(QMainWindow):
 
     def robot_go(self):
         """Function called when Go button is pressed"""
-        self.ybmc.set_velocity(float(self.speed_dial.value()), 
-                               float(self.direction_dial.value()), 
-                               float(self.spin_dial.value()))
+        self.ybmc.go(float(self.speed_dial.value()), 
+                    float(self.direction_dial.value()), 
+                    float(self.spin_dial.value()))
         self.is_running = True
         self.go_button.setStyleSheet('QPushButton {background-color: #21ED1A; color: black;}')
         self.go_button.setText("Running")
@@ -212,7 +212,7 @@ class RobotControlApp(QMainWindow):
         
     def robot_stop(self):
         """Function called when Stop button is pressed"""
-        self.ybmc.control_pwm(0,0,0,0)
+        self.ybmc.stop()
         self.is_running = False
         #self.speed_dial.setValue(0)
         self.go_button.setStyleSheet(self.go_style)
@@ -221,33 +221,33 @@ class RobotControlApp(QMainWindow):
     
     def direction_value_changed(self, i):
         if self.is_running:
-            self.ybmc.set_velocity(float(self.speed_dial.value()), 
-                                   float(i), 
-                                   float(self.spin_dial.value()))
+            self.ybmc.go(float(self.speed_dial.value()), 
+                         float(i), 
+                         float(self.spin_dial.value()))
         self.direction_value.setText(f"{i}")
         self.get_batteries()
 
     def speed_value_changed(self, i):
         if self.is_running:
-            self.ybmc.set_velocity(float(i), 
-                                   float(self.direction_dial.value()), 
-                                   float(self.spin_dial.value()))
+            self.ybmc.go(float(i), 
+                         float(self.direction_dial.value()), 
+                         float(self.spin_dial.value()))
         self.speed_value.setText(f"{i}")
         self.get_batteries()
     
     def spin_value_changed(self, i):
         if self.is_running:
-            self.ybmc.set_velocity(float(self.speed_dial.value()), 
-                                   float(self.direction_dial.value()), 
-                                   float(i))
+            self.ybmc.go(float(self.speed_dial.value()), 
+                         float(self.direction_dial.value()), 
+                         float(i))
         self.spin_value.setText(f"{i}")
         self.get_batteries()
     
     def robot_stop_spin(self, i):
         if self.is_running:
-            self.ybmc.set_velocity(float(self.speed_dial.value()), 
-                                   float(self.direction_dial.value()), 
-                                   0)
+            self.ybmc.go(float(self.speed_dial.value()), 
+                         float(self.direction_dial.value()), 
+                         0)
         self.spin_dial.setValue(0)
         self.spin_value.setText(f"{0}")
         self.get_batteries()
