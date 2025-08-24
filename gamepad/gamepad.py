@@ -15,7 +15,7 @@ from motors import Motors
 class Gamepad:
     '''
     8BitDo SN30Pro 
-    Appears as X-box controller on the Rpi5.
+    Appears as X-box controller on the RPi5.
     '''
     def __init__(
         self, 
@@ -72,11 +72,12 @@ class Gamepad:
         absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_X)
         if math.fabs(absinfo.max) > math.fabs(absinfo.min) : max = math.fabs(absinfo.max)
         else : max = math.fabs(absinfo.max)
-        self.motors_mx = 1500.0/math.fabs(max)
+        self.motors_mx = 1200.0/math.fabs(max)
         absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_Y)
         if math.fabs(absinfo.max) > math.fabs(absinfo.min) : max = math.fabs(absinfo.max)
         else : max = math.fabs(absinfo.max)
-        self.motors_my = 1500.0/math.fabs(max)
+        self.motors_my = 1200.0/math.fabs(max)
+        self.rotation_speed = 300
         
 # -----------------------------------
 
@@ -98,6 +99,11 @@ class Gamepad:
                 if event.code == evdev.ecodes.ABS_RX : 
                     sx=event.value
                     self._update_servos(sx,sy)
+                if event.code == evdev.ecodes.ABS_HAT0Y :
+                    if event.value ==  1 : self.rotation_speed -= 50
+                    if event.value == -1 : self.rotation_speed += 50
+                if self.rotation_speed > 900 : self.rotation_speed = 900
+                if self.rotation_speed < 0   : self.rotation_speed = 0
 # -----------------------------------
 
 # -----------------------------------
@@ -111,18 +117,23 @@ class Gamepad:
 
 # -----------------------------------
     async def run_01(self):
+        omega = 0
         while self.control_motors :
             mx = self.gamepad.absinfo(evdev.ecodes.ABS_X).value
             my = self.gamepad.absinfo(evdev.ecodes.ABS_Y).value
-            if mx>-5 and mx<5 and my>-5 and my<5 :
-                self.motors.stop()
-            else :
-                speed_x = self.motors_mx*math.fabs(mx)
-                speed_y = self.motors_my*math.fabs(my)
-                speed = math.sqrt(speed_x*speed_x+speed_y*speed_y)
-                direction = math.atan2(mx,my)*180.0/math.pi + 180.0
-                self.motors.go(speed,direction,0)
-            await asyncio.sleep(0.05)
+            
+            rcw  = self.gamepad.absinfo(evdev.ecodes.ABS_RZ).value
+            rccw = self.gamepad.absinfo(evdev.ecodes.ABS_Z).value
+            if rcw == 255 and rccw == 0   : omega = self.rotation_speed
+            elif rcw == 0 and rccw == 255 : omega = -self.rotation_speed
+            else : omega = 0
+
+            speed_x = self.motors_mx*math.fabs(mx)
+            speed_y = self.motors_my*math.fabs(my)
+            speed = math.sqrt(speed_x*speed_x+speed_y*speed_y)
+            direction = math.atan2(mx,my)*180.0/math.pi + 180.0
+            self.motors.go(speed,direction,omega)
+            await asyncio.sleep(0.1)
         self.motors.stop()
         return
 # -----------------------------------

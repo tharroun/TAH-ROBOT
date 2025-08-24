@@ -8,7 +8,7 @@ running = True
 async def listen_00(dev):
     global running
     async for ev in dev.async_read_loop():
-        print("00:",evdev.categorize(ev))
+        print("00:",evdev.categorize(ev),ev.value)
         if ev.code == evdev.ecodes.BTN_MODE and ev.value == 0:
             running = False
             break
