@@ -24,8 +24,8 @@ class Servos:
         #pca = PCA9685(i2c, reference_clock_speed=25600000)
         self.pca = PCA9685(self.i2c)
         self.pca.frequency = 50
-        self.servo0 = servo.Servo(self.pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range=180)
-        self.servo1 = servo.Servo(self.pca.channels[1], min_pulse=500, max_pulse=2500, actuation_range=180)
+        self.servo0 = servo.Servo(self.pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range=180) # type: ignore
+        self.servo1 = servo.Servo(self.pca.channels[1], min_pulse=500, max_pulse=2500, actuation_range=180) # type: ignore
 
 # Reset the motor to a start position with a pause
 # otherwise there is sometimes an IO error.

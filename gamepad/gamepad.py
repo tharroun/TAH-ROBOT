@@ -3,7 +3,7 @@
 import evdev
 import math
 import sys
-import time
+import asyncio
 import logging
 import pprint
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
@@ -19,9 +19,7 @@ class Gamepad:
     '''
     def __init__(
         self, 
-        control_servos  : bool = True,
         servos_instance : Servos | None = None,
-        control_motors  : bool = True,
         motors_instance : Motors | None = None,
         logfile: str = "gamepad.log"
     ):
@@ -35,59 +33,109 @@ class Gamepad:
                 found_gamepad = True
                 break
         if found_gamepad: 
-            self.gamepad = evdev.InputDevice(device.path)
+            self.gamepad = evdev.InputDevice(device.path) # type: ignore
         else :
             raise RuntimeError(f"Failed to initialize gamepad.")
         gamepad_str = pprint.pformat(self.gamepad.capabilities(verbose=True))
         self.logger.info(gamepad_str)
 
-        if control_servos:
-            self.control_servos = control_servos
-            if servos_instance != None : 
-                self.servos = servos_instance
-            else : 
-                raise RuntimeError(f"Must supply a valid servo instance, or set control_servos to False.")
-            self.servos.servo0.angle = 90
-            self.servos.servo1.angle = 90
-            # RIGHT STICK
-            # LINEAR MAPING OF STICK (MIN,MAX) -> (0,180) DEGREES
-            absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_RX)
-            self.servos_mx = 180.0/math.fabs(absinfo.max-absinfo.min)
-            self.servos_bx = -self.servos_mx*absinfo.min
-            absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_RY)
-            self.servos_my = 180.0/math.fabs(absinfo.max-absinfo.min)
-            self.servos_by = -self.servos_my*absinfo.min
+        # IT SOMETIMES SEEMS THAT THE EVENTIO QUEUE NEEDS TO BE FLUSHED
+        # SOMETIMES WHEN STARTING THE PROGRAM. MAYBE IT'S ASYNCIO?
+
+        # - SERVOS -----
+        self.control_servos = True
+        if servos_instance != None : 
+            self.servos = servos_instance
+        else : 
+            raise RuntimeError(f"Must supply a valid servo instance, or set control_servos to False.")
+        self.servos.servo0.angle = 90
+        self.servos.servo1.angle = 90
+        # RIGHT STICK
+        # LINEAR MAPING OF STICK (MIN,MAX) -> (0,180) PWM VALUES
+        absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_RX)
+        self.servos_mx = 180.0/math.fabs(absinfo.max-absinfo.min)
+        self.servos_bx = -self.servos_mx*absinfo.min
+        absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_RY)
+        self.servos_my = 180.0/math.fabs(absinfo.max-absinfo.min)
+        self.servos_by = -self.servos_my*absinfo.min
+        
+        # - MOTORS -----
+        self.control_motors = True
+        if motors_instance != None :
+            self.motors = motors_instance
+        else :
+            raise RuntimeError(f"Must supply a valid motors instance, or set control_motors to False.")
+        # LEFT STICK
+        # LINEAR MAPING OF STICK ABS(MIN,MAX) -> (0,1500) PWM SPEED UNITS
+        self.gamepad.set_absinfo(evdev.ecodes.ABS_X,flat=10,fuzz=20)
+        self.gamepad.set_absinfo(evdev.ecodes.ABS_Y,flat=10,fuzz=20)
+        absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_X)
+        if math.fabs(absinfo.max) > math.fabs(absinfo.min) : max = math.fabs(absinfo.max)
+        else : max = math.fabs(absinfo.max)
+        self.motors_mx = 1500.0/math.fabs(max)
+        absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_Y)
+        if math.fabs(absinfo.max) > math.fabs(absinfo.min) : max = math.fabs(absinfo.max)
+        else : max = math.fabs(absinfo.max)
+        self.motors_my = 1500.0/math.fabs(max)
+        
 # -----------------------------------
 
 # -----------------------------------
-    def run(self):
-        x=0
-        y=0
-        running = True
-        while running:
-            event = self.gamepad.read_one()
-            if event :
-                # Use the mode button *and* the button-up action to quit the program
-                # If we don't use the button-up action, it remains in the queue, and the next
-                # time the program runs, it quits!
-                if event.code == evdev.ecodes.BTN_MODE and event.value == 0:
-                    running = False
-                # Right joytick controls the servos.
-                if event.type ==  evdev.ecodes.EV_ABS and self.control_servos:
-                    if event.code == evdev.ecodes.ABS_RY : y=event.value
-                    if event.code == evdev.ecodes.ABS_RX : x=event.value
-                    deg_x = math.trunc(self.servos_mx*x+self.servos_bx)
-                    deg_y = math.trunc(self.servos_mx*y+self.servos_by)
-                    self.servos.servo0.angle = deg_x
-                    self.servos.servo1.angle = deg_y
-                    time.sleep(0.005)
-                    #print(f"{deg_x} {deg_y}")
+    async def run_00(self):
+        sx=0
+        sy=0
+        async for event in self.gamepad.async_read_loop() :
+            if event.code == evdev.ecodes.BTN_MODE and event.value == 0:
+                self.control_motors = False
+                break
+            # Left joystick controls the motors
+            # We have a linar mapping of speed, we need to find the direction.
+            # Right joytick controls the servos.
+            if event.type ==  evdev.ecodes.EV_ABS :
+                if event.code == evdev.ecodes.ABS_RY : 
+                    sy=event.value
+                    self._update_servos(sx,sy)
+                if event.code == evdev.ecodes.ABS_RX : 
+                    sx=event.value
+                    self._update_servos(sx,sy)
 # -----------------------------------
+
+# -----------------------------------
+    def _update_servos(self,sx,sy):
+        deg_x = math.trunc(self.servos_mx*sx+self.servos_bx)
+        deg_y = math.trunc(self.servos_mx*sy+self.servos_by)
+        self.servos.servo0.angle = deg_x
+        self.servos.servo1.angle = deg_y
+        return
+# -----------------------------------
+
+# -----------------------------------
+    async def run_01(self):
+        while self.control_motors :
+            mx = self.gamepad.absinfo(evdev.ecodes.ABS_X).value
+            my = self.gamepad.absinfo(evdev.ecodes.ABS_Y).value
+            if mx>-5 and mx<5 and my>-5 and my<5 :
+                self.motors.stop()
+            else :
+                speed_x = self.motors_mx*math.fabs(mx)
+                speed_y = self.motors_my*math.fabs(my)
+                speed = math.sqrt(speed_x*speed_x+speed_y*speed_y)
+                direction = math.atan2(mx,my)*180.0/math.pi + 180.0
+                self.motors.go(speed,direction,0)
+            await asyncio.sleep(0.05)
+        self.motors.stop()
+        return
+# -----------------------------------
+
+async def main() :
+    my_servos  = Servos()
+    my_motors  = Motors()
+    my_gamepad = Gamepad(servos_instance=my_servos, motors_instance=my_motors)
+    L = await asyncio.gather(
+        my_gamepad.run_00(),
+        my_gamepad.run_01())
+    my_servos.deinit()
+    my_motors.deinit()
 
 if __name__ == "__main__":
-
-    my_servos= Servos()
-    my_gamepad = Gamepad(servos_instance=my_servos)
-    my_gamepad.run()
-    my_servos.deinit()
-
+    asyncio.run(main())

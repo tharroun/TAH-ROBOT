@@ -75,9 +75,6 @@ class Motors:
         self.W = RobotFrame.WIDTH//2
         self.L = RobotFrame.LENGTH//2
         self.wheel_diameter = RobotFrame.WHEEL_DIAMETER
-        self.velocity = 0
-        self.direction = 0
-        self.angular_rate = 0
         return
 # -----------------------------------
 
@@ -243,9 +240,6 @@ All other data is shunted to log.
         v3 = int(vx + vy + vp)
         v4 = int(vx - vy + vp)
         self.control_pwm(v2, -v4, -v1, v3)
-        self.velocity     = velocity
-        self.direction    = direction
-        self.angular_rate = angular_rate
         return
 # -----------------------------------
 # -----------------------------------
@@ -260,7 +254,7 @@ if __name__ == "__main__":
     #time.sleep(2)
     #ybmc.control_pwm(0, 0, 0, 0)
 
-    
+    '''
     motors.send_upload_command(EncoderMode.SPEED)
     motors.go(350.0, 0.0, 0.0)
     time.sleep(2)
@@ -272,5 +266,12 @@ if __name__ == "__main__":
     time.sleep(2)
     motors.stop()
     time.sleep(0.5)
-    
+    '''
+
+    v = 100
+    while v < 1500 :
+        motors.go(v, 0.0, 0.0)
+        time.sleep(0.01)
+        v += 100
+    motors.stop()
     motors.deinit()
