@@ -6,8 +6,7 @@ We are using the Adafruit library for the MZ996R servos on the PCA9685 16-channe
 sudo apt install joystick
 apt install python3-pyqt6
 apt install python3-opencv
-apt install rpicam
-apt install libcamera
+apt install rpicamera
 cd TAH-ROBOT
 python3 -m venv .venv --system-site-packages
 source .venv/bin/activate
