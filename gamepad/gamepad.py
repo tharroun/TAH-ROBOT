@@ -56,7 +56,7 @@ class Gamepad:
         self.servos_mx = 180.0/math.fabs(absinfo.max-absinfo.min)
         self.servos_bx = -self.servos_mx*absinfo.min
         absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_RY)
-        self.servos_my = 180.0/math.fabs(absinfo.max-absinfo.min)
+        self.servos_my = 153.0/math.fabs(absinfo.max-absinfo.min)
         self.servos_by = -self.servos_my*absinfo.min
         
         # - MOTORS -----
@@ -109,7 +109,8 @@ class Gamepad:
 # -----------------------------------
     def _update_servos(self,sx,sy):
         deg_x = math.trunc(self.servos_mx*sx+self.servos_bx)
-        deg_y = math.trunc(self.servos_mx*sy+self.servos_by)
+        deg_y = math.trunc(self.servos_my*sy+self.servos_by)
+        #print(deg_x,deg_y)
         self.servos.servo0.angle = deg_x
         self.servos.servo1.angle = deg_y
         return

@@ -16,15 +16,15 @@ wheel_diameter:95.000
 INFO:motors:P:0.100	 I:0.002	 D:0.010
 INFO:motors:Initialized motor parameters.
 INFO:__main__:{('EV_ABS', 3): [(('ABS_X', 0),
-                  AbsInfo(value=0, min=-32768, max=32767, fuzz=20, flat=10, resolution=0)),
+                  AbsInfo(value=0, min=-32768, max=32767, fuzz=16, flat=128, resolution=0)),
                  (('ABS_Y', 1),
-                  AbsInfo(value=-1, min=-32768, max=32767, fuzz=20, flat=10, resolution=0)),
+                  AbsInfo(value=0, min=-32768, max=32767, fuzz=16, flat=128, resolution=0)),
                  (('ABS_Z', 2),
                   AbsInfo(value=0, min=0, max=255, fuzz=0, flat=0, resolution=0)),
                  (('ABS_RX', 3),
                   AbsInfo(value=0, min=-32768, max=32767, fuzz=16, flat=128, resolution=0)),
                  (('ABS_RY', 4),
-                  AbsInfo(value=-1, min=-32768, max=32767, fuzz=16, flat=128, resolution=0)),
+                  AbsInfo(value=0, min=-32768, max=32767, fuzz=16, flat=128, resolution=0)),
                  (('ABS_RZ', 5),
                   AbsInfo(value=0, min=0, max=255, fuzz=0, flat=0, resolution=0)),
                  (('ABS_HAT0X', 16),

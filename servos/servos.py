@@ -25,7 +25,7 @@ class Servos:
         self.pca = PCA9685(self.i2c)
         self.pca.frequency = 50
         self.servo0 = servo.Servo(self.pca.channels[0], min_pulse=500, max_pulse=2500, actuation_range=180) # type: ignore
-        self.servo1 = servo.Servo(self.pca.channels[1], min_pulse=500, max_pulse=2500, actuation_range=180) # type: ignore
+        self.servo1 = servo.Servo(self.pca.channels[1], min_pulse=500, max_pulse=2200, actuation_range=153) # type: ignore
 
 # Reset the motor to a start position with a pause
 # otherwise there is sometimes an IO error.
@@ -77,16 +77,30 @@ if __name__ == "__main__":
     servos = Servos()
     # We sleep in the loops to give the servo time to move into position.
     print("forward")
+    servos.servo0.angle = 0
+    time.sleep(0.5)
     for i in range(180):
         servos.servo0.angle = i
-        servos.servo1.angle = i
-        time.sleep(0.005)
+        time.sleep(0.01)
     print("backward")
     for i in range(180):
         servos.servo0.angle = 180 - i
-        servos.servo1.angle = 180 - i
-        time.sleep(0.005)
+        time.sleep(0.01)
+    servos.servo0.angle=90
+    time.sleep(1.0)
 
+
+    servos.servo1.angle = 0
+    time.sleep(0.5)
+    for i in range(153):
+        servos.servo1.angle = i
+        time.sleep(0.01)
+    print("backward")
+    for i in range(153):
+        servos.servo1.angle = 153 - i
+        time.sleep(0.01)
+    servos.servo1.angle=90
+    time.sleep(0.5)
     servos.deinit()
 
 
