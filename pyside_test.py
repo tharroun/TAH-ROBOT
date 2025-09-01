@@ -18,6 +18,9 @@ class MainWindow(QMainWindow):
         
 
     def _makeUI(self):
+        self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
+        self.setGeometry(0,0,200, 480)
+    
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout()
@@ -29,9 +32,7 @@ class MainWindow(QMainWindow):
         
         main_layout.addWidget(self.button) 
         main_layout.addStretch()
-        self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint)
-        self.resize(200, 480)
-        self.move(0, 0)
+
 
 
     def quit_program(self):
