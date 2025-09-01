@@ -3,14 +3,12 @@ from PySide6.QtWidgets import (
     QApplication, 
     QWidget,
     QMainWindow,
-    QHBoxLayout,
+    QVBoxLayout,
     QPushButton,
 )
 from PySide6.QtCore import Qt
 from PySide6.QtGui import (
     QCloseEvent,
-    QPalette, 
-    QColor,
 )
 
 class MainWindow(QMainWindow):
@@ -22,11 +20,11 @@ class MainWindow(QMainWindow):
     def _makeUI(self):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-        main_layout = QHBoxLayout()
+        main_layout = QVBoxLayout()
         central_widget.setLayout(main_layout)
 
         self.quit_clicked = False
-        self.button = QPushButton("My Button", self)
+        self.button = QPushButton("Quit Program", self)
         self.button.clicked.connect(self.quit_program)
         
         main_layout.addWidget(self.button) 
