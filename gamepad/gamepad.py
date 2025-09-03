@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-# coding=utf8
+#coding=utf8
 import evdev
 import math
 import sys
 import asyncio
-import logging
 import pprint
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/servos')
@@ -21,10 +20,7 @@ class Gamepad:
         self, 
         servos_instance : Servos | None = None,
         motors_instance : Motors | None = None,
-        logfile: str = "gamepad.log"
     ):
-        self.logger = logging.getLogger(__name__)
-        logging.basicConfig(filename=logfile, filemode='w', level=logging.INFO)
 
         found_gamepad = False
         devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
@@ -36,11 +32,10 @@ class Gamepad:
             self.gamepad = evdev.InputDevice(device.path) # type: ignore
         else :
             raise RuntimeError(f"Failed to initialize gamepad.")
-        gamepad_str = pprint.pformat(self.gamepad.capabilities(verbose=True))
-        self.logger.info(gamepad_str)
+        # gamepad_str = pprint.pformat(self.gamepad.capabilities(verbose=True))
 
         # IT SOMETIMES SEEMS THAT THE EVENTIO QUEUE NEEDS TO BE FLUSHED
-        # SOMETIMES WHEN STARTING THE PROGRAM. MAYBE IT'S ASYNCIO?
+        # WHEN STARTING THE PROGRAM. MAYBE IT'S ASYNCIO?
 
         # - SERVOS -----
         self.control_servos = True
@@ -104,10 +99,13 @@ class Gamepad:
                     if event.value == -1 : self.rotation_speed += 50
                 if self.rotation_speed > 900 : self.rotation_speed = 900
                 if self.rotation_speed < 0   : self.rotation_speed = 0
+        return
 # -----------------------------------
 
 # -----------------------------------
-    def _update_servos(self,sx,sy):
+    def _update_servos(self,
+                       sx: float = 0,
+                       sy: float= 0) :
         deg_x = math.trunc(self.servos_mx*sx+self.servos_bx)
         deg_y = math.trunc(self.servos_my*sy+self.servos_by)
         #print(deg_x,deg_y)
@@ -139,7 +137,7 @@ class Gamepad:
         return
 # -----------------------------------
 
-async def main() :
+async def gamepad_control() :
     my_servos  = Servos()
     my_motors  = Motors()
     my_gamepad = Gamepad(servos_instance=my_servos, motors_instance=my_motors)
@@ -150,4 +148,4 @@ async def main() :
     my_motors.deinit()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(gamepad_control())
