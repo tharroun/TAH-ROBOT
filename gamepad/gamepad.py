@@ -99,6 +99,7 @@ class Gamepad:
                     if event.value == -1 : self.rotation_speed += 50
                 if self.rotation_speed > 900 : self.rotation_speed = 900
                 if self.rotation_speed < 0   : self.rotation_speed = 0
+        self.gamepad.close()
         return
 # -----------------------------------
 
