@@ -4,6 +4,8 @@ import evdev
 import math
 import sys
 import asyncio
+import signal
+import functools
 import pprint
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/servos')
@@ -138,13 +140,26 @@ class Gamepad:
         return
 # -----------------------------------
 
+def signal_handler(loop):
+    print("Signal captured, stopping the loop...")
+    #sys.exit()
+    loop.stop()
+
+
 async def gamepad_control() :
     my_servos  = Servos()
     my_motors  = Motors()
     my_gamepad = Gamepad(servos_instance=my_servos, motors_instance=my_motors)
-    L = await asyncio.gather(
+    loop = asyncio.get_event_loop()
+    loop.add_signal_handler(signal.SIGINT, functools.partial(signal_handler,loop))
+    loop.add_signal_handler(signal.SIGHUP, functools.partial(signal_handler,loop))
+    result = await asyncio.gather(
         my_gamepad.run_00(),
         my_gamepad.run_01())
+    #with ProcessPoolExecutor() as executor:
+    #    results = loop.run_in_executor(executor,jobs)
+    #loop.run_until_complete(jobs)
+    #loop.close()
     my_servos.deinit()
     my_motors.deinit()
 
