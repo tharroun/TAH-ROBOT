@@ -15,6 +15,10 @@ config = picam2.create_preview_configuration(main={'size': (2304,1296),
 picam2.align_configuration(config)
 picam2.configure(config)
 
+cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
+cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+#cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
+
 picam2.start()
 
 t1 = time.time() 
