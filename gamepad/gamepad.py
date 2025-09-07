@@ -43,7 +43,7 @@ class Gamepad:
         while self.gamepad.read_one():
             pass
 
-        if battery_queue != None
+        if battery_queue != None:
             self.battery_queue = battery_queue
 
         # - SERVOS -----
