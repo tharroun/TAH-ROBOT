@@ -51,7 +51,7 @@ class Camera:
             #print(1/(t2-t1))
             t1 = t2
             if self.has_message:
-                if self.message_queue.full() :
+                if self.message_queue.empty() == False :
                     print(self.message_queue.get())
             if cv2.waitKey(1)==ord('q'):
                 break
