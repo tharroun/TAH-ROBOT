@@ -68,8 +68,8 @@ class Camera:
             u_s = cv2.getTrackbarPos('US','Camera')
             u_v = cv2.getTrackbarPos('UV','Camera')
 
-            l_b = np.array([l_h, l_s, l_v])
-            u_b = np.array([u_h, u_s, u_v])
+            l_b = numpy.array([l_h, l_s, l_v])
+            u_b = numpy.array([u_h, u_s, u_v])
 
             res_hsv  = cv2.cvtColor(res, cv2.COLOR_BGR2HSV_FULL)
             color_mask = cv2.inRange(res_hsv, l_b, u_b)
