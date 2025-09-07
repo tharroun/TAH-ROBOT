@@ -32,12 +32,15 @@ class Motors:
         self, 
         device: str = "/dev/ttyUSB0", 
         enable_recv: bool = True,
+        log: bool = False,
         logfile: str = "motors.log"
     ):
 
-        self.logger = logging.getLogger(__name__)
-        logging.basicConfig(filename=logfile, filemode='w', level=logging.INFO)
-
+        if log:
+            self.logger = logging.getLogger(__name__)
+            logging.basicConfig(filename=logfile, filemode='w', level=logging.INFO)
+        self.log = log
+        
         try:
             self.port = serial.Serial(device)
             self.port.rts      = False
@@ -47,7 +50,7 @@ class Motors:
             self.port.stopbits = serial.STOPBITS_ONE
             self.port.bytesize = serial.EIGHTBITS
             time.sleep(0.1)
-            self.logger.info("Opened serial port.")
+            if self.log: self.logger.info("Opened serial port.")
         except serial.SerialException as e:
             raise RuntimeError(f"Failed to initialize serial port: {e}")
     
@@ -59,7 +62,7 @@ class Motors:
             self.recv_buffer    = ""
             self.queue_battery  = collections.deque(maxlen=1)
             self.queue_battery.append('Unk')
-            self.logger.info("Started listening to serial port.")
+            if self.log: self.logger.info("Started listening to serial port.")
 
         self.set_motor_type(1)
         self.set_motor_deadzone(1500)
@@ -70,7 +73,7 @@ class Motors:
         self.control_pwm(0,0,0,0)
         self.send_upload_command(EncoderMode.NOTHING)
         self.send_data("$read_flash#")
-        self.logger.info("Initialized motor parameters.")
+        if self.log: self.logger.info("Initialized motor parameters.")
 
         self.W = RobotFrame.WIDTH//2
         self.L = RobotFrame.LENGTH//2
@@ -116,10 +119,10 @@ All other data is shunted to log.
                         end   = self.recv_buffer.index( '#', start )
                         self.queue_battery.append(self.recv_buffer[start:end])
                     except ValueError:
-                        self.logger.info("Cannot parse battery information.")
+                        if self.log: self.logger.info("Cannot parse battery information.")
                         self.queue_battery.append('Err')
                 else:
-                    self.logger.info(self.recv_buffer)
+                    if self.log: self.logger.info(self.recv_buffer)
             else:
                 time.sleep(0.01)
         return
@@ -132,11 +135,11 @@ All other data is shunted to log.
             self.stop_listening = True
             self.enable_recv    = False
             self.listening.join()
-            self.logger.info("Stopped listening thread.")
+            if self.log: self.logger.info("Stopped listening thread.")
         else: 
-            self.logger.warning(f"Reception was not enabled to stop the listening thread.")
+            if self.log: self.logger.warning(f"Reception was not enabled to stop the listening thread.")
         self.port.close()
-        self.logger.info("Closed serial port.")
+        if self.log: self.logger.info("Closed serial port.")
         return
 # -----------------------------------
 

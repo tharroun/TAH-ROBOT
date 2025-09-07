@@ -19,19 +19,17 @@ pip3 install evdev
 ## To-do list
 
 ### Construction
-- Add the super-structure and cover
-- Add mmounting bracket for the touch screen
-- Attach the pan-tilt servo to the super-structure
-- What is the deadtime for the 520 motor?
 
 ### Programming
-- Control program
-    - Remove the logger and add a text window to show messages 
+- Drive
+    - Need to add text messages to the 
     - Add a button and label to monitor wheel speeds
     - Include a PID control adjustment tool
-- Motor control
+- Motors
+    - What is the deadtime for the 520 motor?
     - Test using the YB speed control
     - Failing that, make my own speed control tuner using PWM
-- Pan-tilt
-    - Write pan tilt control SDK
+- Servos
+    - How to find the max/min of the servo?
+    - How to re-center the servos?
 

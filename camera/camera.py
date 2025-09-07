@@ -10,13 +10,15 @@ class Camera:
     """
     def __init__(
         self, 
+        log : bool = False,
         logfile: str = "PiCamMod3.conf"
     ):
         self.picam2 = Picamera2()
 
-        with open("PiCamMod3.conf","w") as fp:
-            pprint.pp(self.picam2.camera_controls,fp)
-            pprint.pp(self.picam2.sensor_modes,fp)
+        if log:
+            with open("PiCamMod3.conf","w") as fp:
+                pprint.pp(self.picam2.camera_controls,fp)
+                pprint.pp(self.picam2.sensor_modes,fp)
 
         mode   = self.picam2.sensor_modes[0]
         config = self.picam2.create_preview_configuration(main={'size': (2304,1296),
