@@ -4,6 +4,7 @@ import evdev
 import math
 import sys
 import asyncio
+import multiprocessing
 import signal
 import functools
 import pprint
@@ -22,6 +23,7 @@ class Gamepad:
         self, 
         servos_instance : Servos | None = None,
         motors_instance : Motors | None = None,
+        battery_queue   : multiprocessing.JoinableQueue | None = None
     ):
 
         found_gamepad = False
@@ -40,6 +42,9 @@ class Gamepad:
         # WHEN STARTING THE PROGRAM. MAYBE IT'S ASYNCIO?
         while self.gamepad.read_one():
             pass
+
+        if battery_queue != None
+            self.battery_queue = battery_queue
 
         # - SERVOS -----
         self.control_servos = True
@@ -158,7 +163,9 @@ class Gamepad:
 async def gamepad_control() :
     my_servos  = Servos()
     my_motors  = Motors()
-    my_gamepad = Gamepad(servos_instance=my_servos, motors_instance=my_motors)
+    my_gamepad = Gamepad(servos_instance=my_servos, 
+                         motors_instance=my_motors,
+                         battery_queue = None)
 
     loop   = asyncio.get_running_loop()
     future = await asyncio.gather(my_gamepad.event_loop(),
