@@ -168,8 +168,7 @@ async def gamepad_control() :
     my_servos  = Servos()
     my_motors  = Motors()
     my_gamepad = Gamepad(servos_instance=my_servos, 
-                         motors_instance=my_motors,
-                         battery_queue = None)
+                         motors_instance=my_motors)
 
     loop   = asyncio.get_running_loop()
     future = await asyncio.gather(my_gamepad.event_loop(),
