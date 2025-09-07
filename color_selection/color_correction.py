@@ -2,6 +2,7 @@ import cv2
 import time
 from multiprocessing import JoinableQueue
 import pprint
+import numpy
 from picamera2 import Picamera2
 
 small_kernel   = numpy.ones((3, 3), numpy.uint8)
