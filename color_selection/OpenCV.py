@@ -10,7 +10,7 @@ with open("PiCamMod3.conf","w") as fp:
     pprint.pp(picam2.sensor_modes,fp)
 
 mode   = picam2.sensor_modes[0]
-config = picam2.create_preview_configuration(main={'size': (4608,2592),
+config = picam2.create_preview_configuration(main={'size': (2304,1296),
                                                    'format': 'RGB888'})
 picam2.align_configuration(config)
 picam2.configure(config)
@@ -19,8 +19,8 @@ picam2.start()
 
 t1 = time.time() 
 while True:
-    im= picam2.capture_array()
-    res = cv2.resize(im,(1152,648),interpolation = cv2.INTER_CUBIC)
+    im  = picam2.capture_array()
+    res = cv2.resize(im,(800,480),interpolation = cv2.INTER_CUBIC)
     cv2.imshow("Camera", res)
     t2 = time.time()
     #print(1/(t2-t1))
@@ -31,5 +31,4 @@ cv2.destroyAllWindows()
 picam2.stop()
 picam2.close()
 
-TFprTJJWBz9Scx4
 

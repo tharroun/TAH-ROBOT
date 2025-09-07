@@ -38,6 +38,8 @@ class Gamepad:
 
         # IT SOMETIMES SEEMS THAT THE EVENTIO QUEUE NEEDS TO BE FLUSHED
         # WHEN STARTING THE PROGRAM. MAYBE IT'S ASYNCIO?
+        while self.gamepad.read_one():
+            pass
 
         # - SERVOS -----
         self.control_servos = True
@@ -79,7 +81,7 @@ class Gamepad:
 # -----------------------------------
 
 # -----------------------------------
-    async def run_00(self):
+    async def run_00(self) -> bool:
         sx=0
         sy=0
         async for event in self.gamepad.async_read_loop() :
@@ -102,7 +104,8 @@ class Gamepad:
                 if self.rotation_speed > 900 : self.rotation_speed = 900
                 if self.rotation_speed < 0   : self.rotation_speed = 0
         self.gamepad.close()
-        return
+        print("finished run_00")
+        return True
 # -----------------------------------
 
 # -----------------------------------
@@ -118,7 +121,7 @@ class Gamepad:
 # -----------------------------------
 
 # -----------------------------------
-    async def run_01(self):
+    async def run_01(self) -> bool:
         omega = 0
         while self.control_motors :
             mx = self.gamepad.absinfo(evdev.ecodes.ABS_X).value
@@ -137,31 +140,25 @@ class Gamepad:
             self.motors.go(speed,direction,omega)
             await asyncio.sleep(0.1)
         self.motors.stop()
-        return
+        print("finished run_01")
+        return True
 # -----------------------------------
-
-def signal_handler(loop):
-    print("Signal captured, stopping the loop...")
-    #sys.exit()
-    loop.stop()
 
 
 async def gamepad_control() :
     my_servos  = Servos()
     my_motors  = Motors()
     my_gamepad = Gamepad(servos_instance=my_servos, motors_instance=my_motors)
-    loop = asyncio.get_event_loop()
-    loop.add_signal_handler(signal.SIGINT, functools.partial(signal_handler,loop))
-    loop.add_signal_handler(signal.SIGHUP, functools.partial(signal_handler,loop))
-    result = await asyncio.gather(
-        my_gamepad.run_00(),
-        my_gamepad.run_01())
-    #with ProcessPoolExecutor() as executor:
-    #    results = loop.run_in_executor(executor,jobs)
-    #loop.run_until_complete(jobs)
-    #loop.close()
+
+    loop   = asyncio.get_running_loop()
+    future = await asyncio.gather(my_gamepad.run_00(),my_gamepad.run_01())  
+    
     my_servos.deinit()
     my_motors.deinit()
 
 if __name__ == "__main__":
     asyncio.run(gamepad_control())
+
+
+
+
