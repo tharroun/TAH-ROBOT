@@ -33,17 +33,20 @@ class Camera:
         self.picam2.configure(config)
 
         cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
-        cv2.createTrackbar("LH", 'Camera', 0, 255, nothing)   # OpenCV hue max = 179
-        cv2.createTrackbar("LS", 'Camera', 0, 255, nothing)
-        cv2.createTrackbar("LV", 'Camera', 0, 255, nothing)
-        cv2.createTrackbar("UH", 'Camera', 255, 255, nothing)
-        cv2.createTrackbar("US", 'Camera', 255, 255, nothing)
-        cv2.createTrackbar("UV", 'Camera', 255, 255, nothing)
+        cv2.createTrackbar("LH", 'Camera', 0, 255, self.nothing)   # OpenCV hue max = 179
+        cv2.createTrackbar("LS", 'Camera', 0, 255, self.nothing)
+        cv2.createTrackbar("LV", 'Camera', 0, 255, self.nothing)
+        cv2.createTrackbar("UH", 'Camera', 255, 255, self.nothing)
+        cv2.createTrackbar("US", 'Camera', 255, 255, self.nothing)
+        cv2.createTrackbar("UV", 'Camera', 255, 255, self.nothing)
         #cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
         
         self.picam2.start()
 # ------------------------------------------
+
+    def nothing(self, s):
+        return None
 
 # ------------------------------------------
     def start(self):
