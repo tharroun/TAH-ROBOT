@@ -23,6 +23,7 @@ def robot_see():
 async def gamepad_control() :
     my_servos  = Servos()
     my_motors  = Motors()
+    print(my_motors.get_battery())
     my_gamepad = Gamepad(servos_instance=my_servos, motors_instance=my_motors)
 
     vision_process = multiprocessing.Process(target=robot_see, args=())
