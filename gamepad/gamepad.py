@@ -4,7 +4,7 @@ import evdev
 import math
 import sys
 import asyncio
-import multiprocessing
+from  multiprocessing import JoinableQueue
 import signal
 import functools
 import pprint
@@ -23,7 +23,7 @@ class Gamepad:
         self, 
         servos_instance : Servos | None = None,
         motors_instance : Motors | None = None,
-        battery_queue   : multiprocessing.JoinableQueue = None
+        battery_queue   : JoinableQueue | None = None,
     ):
 
         found_gamepad = False
