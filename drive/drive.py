@@ -30,7 +30,9 @@ async def gamepad_control() :
     vision_process.start()
 
     gamepad_loop   = asyncio.get_running_loop()
-    future = await asyncio.gather(my_gamepad.run_00(),my_gamepad.run_01())  
+    future = await asyncio.gather(my_gamepad.event_loop(),
+                                  my_gamepad.drive_loop(),
+                                  my_gamepad.battery_loop())  
     
     vision_process.terminate()
     my_servos.deinit()

@@ -104,7 +104,7 @@ class Gamepad:
                 if self.rotation_speed > 900 : self.rotation_speed = 900
                 if self.rotation_speed < 0   : self.rotation_speed = 0
         self.gamepad.close()
-        print("finished run_00")
+        print("Finished event_loop")
         return True
 # -----------------------------------
 
@@ -140,8 +140,8 @@ class Gamepad:
             self.motors.go(speed,direction,omega)
             await asyncio.sleep(0.1)
         self.motors.stop()
-        print("finished run_01")
-        return True
+        print("Finished drive_loop")
+        return Trueu
 # -----------------------------------
 
 
@@ -151,7 +151,7 @@ class Gamepad:
             volts = self.motors.get_battery()
             print(f"Motor voltage: {volts}")
             await asyncio.sleep(2.0)
-        print("finished run_02")
+        print("Finished battery_loop")
         return True
 #-----------------------------------
 
