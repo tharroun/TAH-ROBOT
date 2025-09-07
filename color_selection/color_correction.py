@@ -60,13 +60,13 @@ class Camera:
             #print(1/(t2-t1))
             t1 = t2
             
-            l_h = cv2.getTrackbarPos('LH','config')
-            l_s = cv2.getTrackbarPos('LS','config')
-            l_v = cv2.getTrackbarPos('LV','config')
+            l_h = cv2.getTrackbarPos('LH','Camera')
+            l_s = cv2.getTrackbarPos('LS','Camera')
+            l_v = cv2.getTrackbarPos('LV','Camera')
 
-            u_h = cv2.getTrackbarPos('UH','config')
-            u_s = cv2.getTrackbarPos('US','config')
-            u_v = cv2.getTrackbarPos('UV','config')
+            u_h = cv2.getTrackbarPos('UH','Camera')
+            u_s = cv2.getTrackbarPos('US','Camera')
+            u_v = cv2.getTrackbarPos('UV','Camera')
 
             l_b = np.array([l_h, l_s, l_v])
             u_b = np.array([u_h, u_s, u_v])
