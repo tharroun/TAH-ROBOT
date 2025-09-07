@@ -81,7 +81,7 @@ class Gamepad:
 # -----------------------------------
 
 # -----------------------------------
-    async def run_00(self) -> bool:
+    async def event_loop(self) -> bool:
         sx=0
         sy=0
         async for event in self.gamepad.async_read_loop() :
@@ -121,7 +121,7 @@ class Gamepad:
 # -----------------------------------
 
 # -----------------------------------
-    async def run_01(self) -> bool:
+    async def drive_loop(self) -> bool:
         omega = 0
         while self.control_motors :
             mx = self.gamepad.absinfo(evdev.ecodes.ABS_X).value
@@ -146,11 +146,12 @@ class Gamepad:
 
 
 # -----------------------------------
-    async def run_02(self) -> bool:
+    async def battery_loop(self) -> bool:
         while self.control_motors :
             volts = self.motors.get_battery()
             print(f"Motor voltage: {volts}")
             await asyncio.sleep(2.0)
+        print("finished run_02")
         return True
 #-----------------------------------
 
@@ -160,9 +161,9 @@ async def gamepad_control() :
     my_gamepad = Gamepad(servos_instance=my_servos, motors_instance=my_motors)
 
     loop   = asyncio.get_running_loop()
-    future = await asyncio.gather(my_gamepad.run_00(),
-                                  my_gamepad.run_01(),
-                                  my_gamepad.run_02())  
+    future = await asyncio.gather(my_gamepad.event_loop(),
+                                  my_gamepad.drive_loop(),
+                                  my_gamepad.battery_loop())  
     
     my_servos.deinit()
     my_motors.deinit()
