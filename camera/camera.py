@@ -29,8 +29,8 @@ class Camera:
         self.picam2.configure(config)
 
         cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
-        #cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
+        cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
 
         self.has_message = False
         if message_queue != None:
@@ -46,7 +46,8 @@ class Camera:
         volts = "V"
         while True:
             im  = self.picam2.capture_array()
-            res = cv2.resize(im,(596,324),interpolation = cv2.INTER_CUBIC)
+            #res = cv2.resize(im,(596,324),interpolation = cv2.INTER_CUBIC)
+            res = cv2.resize(im,(800,480),interpolation = cv2.INTER_CUBIC)
 
             t2 = time.time()
             #print(1/(t2-t1))
