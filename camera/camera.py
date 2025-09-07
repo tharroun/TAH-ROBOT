@@ -51,7 +51,8 @@ class Camera:
             #print(1/(t2-t1))
             t1 = t2
             if self.has_message:
-                print(self.message_queue.get_nowait())
+                if self.message_queue.full() :
+                    print(self.message_queue.get())
             if cv2.waitKey(1)==ord('q'):
                 break
         cv2.destroyAllWindows()
