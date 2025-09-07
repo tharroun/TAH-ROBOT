@@ -16,7 +16,7 @@ sys.path.append('/home/tah/GitHub/TAH-ROBOT/camera')
 from camera  import Camera
 
 def robot_see(message_queue):
-    my_camera = Camera(message_queue)
+    my_camera = Camera(message_queue = message_queue)
     my_camera.start()
     #my_camera.deinit()
 

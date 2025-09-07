@@ -1,6 +1,6 @@
 import cv2
 import time
-import multiprocessing
+from multiprocessing import JoinableQueue
 import pprint
 from picamera2 import Picamera2
 
@@ -11,7 +11,7 @@ class Camera:
     """
     def __init__(
         self, 
-        message_queue :  multiprocessing.JoinableQueue = None,
+        message_queue :  type[JoinableQueue] | None = None,
         log : bool = False,
         logfile: str = "PiCamMod3.conf"
     ):

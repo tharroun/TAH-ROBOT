@@ -23,7 +23,7 @@ class Gamepad:
         self, 
         servos_instance : Servos | None = None,
         motors_instance : Motors | None = None,
-        battery_queue   : type(JoinableQueue) | None = None,
+        battery_queue   : type[JoinableQueue] | None = None,
     ):
 
         found_gamepad = False
