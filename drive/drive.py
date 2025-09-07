@@ -15,18 +15,20 @@ from gamepad import Gamepad
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/camera')
 from camera  import Camera
 
-def robot_see():
-    my_camera = Camera()
+def robot_see(message_queue):
+    my_camera = Camera(message_queue)
     my_camera.start()
     #my_camera.deinit()
 
 async def gamepad_control() :
     my_servos  = Servos()
     my_motors  = Motors()
-    print(my_motors.get_battery())
-    my_gamepad = Gamepad(servos_instance=my_servos, motors_instance=my_motors)
+    my_battery = multiprocessing.JoinableQueue()
+    my_gamepad = Gamepad(servos_instance=my_servos, 
+                         motors_instance=my_motors,
+                         battery_queue  =my_battery)
 
-    vision_process = multiprocessing.Process(target=robot_see, args=())
+    vision_process = multiprocessing.Process(target=robot_see, args=(my_battery,))
     vision_process.start()
 
     gamepad_loop   = asyncio.get_running_loop()

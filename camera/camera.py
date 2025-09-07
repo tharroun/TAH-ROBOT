@@ -1,5 +1,6 @@
 import cv2
 import time
+import multiprocessing
 import pprint
 from picamera2 import Picamera2
 
@@ -10,13 +11,14 @@ class Camera:
     """
     def __init__(
         self, 
+        message_queue :  multiprocessing.JoinableQueue = None,
         log : bool = False,
         logfile: str = "PiCamMod3.conf"
     ):
         self.picam2 = Picamera2()
 
         if log:
-            with open("PiCamMod3.conf","w") as fp:
+            with open(logfile,"w") as fp:
                 pprint.pp(self.picam2.camera_controls,fp)
                 pprint.pp(self.picam2.sensor_modes,fp)
 
@@ -30,6 +32,11 @@ class Camera:
         #cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
 
+        self.has_message = False
+        if message_queue != None:
+            self.message_queue = message_queue
+            self.has_message = True
+        
         self.picam2.start()
 # ------------------------------------------
 
@@ -43,6 +50,8 @@ class Camera:
             t2 = time.time()
             #print(1/(t2-t1))
             t1 = t2
+            if self.has_message:
+                print(self.message_queue.get())
             if cv2.waitKey(1)==ord('q'):
                 break
         cv2.destroyAllWindows()
