@@ -43,16 +43,24 @@ class Camera:
 # ------------------------------------------
     def start(self):
         t1 = time.time() 
+        volts = "V"
         while True:
             im  = self.picam2.capture_array()
             res = cv2.resize(im,(596,324),interpolation = cv2.INTER_CUBIC)
-            cv2.imshow("Camera", res)
+
             t2 = time.time()
             #print(1/(t2-t1))
             t1 = t2
+            
             if self.has_message:
                 if self.message_queue.empty() == False :
-                    print(self.message_queue.get())
+                    #print(self.message_queue.get())
+                    volts = self.message_queue.get()
+            
+            res = cv2.putText(res, volts, (50,50), cv2.FONT_HERSHEY_SIMPLEX, 
+                              1, (255, 0, 0), 3, cv2.LINE_AA)
+            cv2.imshow("Camera", res)
+
             if cv2.waitKey(1)==ord('q'):
                 break
         cv2.destroyAllWindows()
