@@ -1,10 +1,11 @@
 import cv2
 import time
-from multiprocessing import JoinableQueue
+from   multiprocessing import JoinableQueue
 import pprint
-from picamera2 import Picamera2
-from os.path import exists
+from   picamera2 import Picamera2
+from   os.path import exists
 import numpy
+import yaml
 
 small_kernel   = numpy.ones((3, 3), numpy.uint8)
 medium_kernel  = numpy.ones((6, 6), numpy.uint8)
