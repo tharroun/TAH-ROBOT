@@ -3,12 +3,14 @@ import time
 from multiprocessing import JoinableQueue
 import pprint
 import numpy
+import yaml
 from picamera2 import Picamera2
 
 small_kernel   = numpy.ones((3, 3), numpy.uint8)
 medium_kernel  = numpy.ones((6, 6), numpy.uint8)
 large_kernel   = numpy.ones((9, 9), numpy.uint8)
 
+calbiration_filename = '/home/tah/GitHub/TAH-ROBOT/color_correction/calibration.yaml' 
 
 class Camera:
     """
@@ -33,10 +35,10 @@ class Camera:
         self.picam2.configure(config)
 
         cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
-        cv2.createTrackbar("LH", 'Camera', 0, 255, self.nothing)   # OpenCV hue max = 179
-        cv2.createTrackbar("LS", 'Camera', 0, 255, self.nothing)
-        cv2.createTrackbar("LV", 'Camera', 0, 255, self.nothing)
-        cv2.createTrackbar("UH", 'Camera', 255, 255, self.nothing)
+        cv2.createTrackbar("LH", 'Camera', 80, 255, self.nothing)   # OpenCV hue max = 179
+        cv2.createTrackbar("LS", 'Camera', 80, 255, self.nothing)
+        cv2.createTrackbar("LV", 'Camera', 80, 255, self.nothing)
+        cv2.createTrackbar("UH", 'Camera', 140, 255, self.nothing)
         cv2.createTrackbar("US", 'Camera', 255, 255, self.nothing)
         cv2.createTrackbar("UV", 'Camera', 255, 255, self.nothing)
         #cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
@@ -70,7 +72,7 @@ class Camera:
             frame_hsv  = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
             color_mask = cv2.inRange(frame_hsv, l_b, u_b)
             color_mask = cv2.morphologyEx(color_mask, cv2.MORPH_CLOSE, small_kernel, iterations = 1)
-            color_mask = cv2.morphologyEx(color_mask, cv2.MORPH_OPEN, small_kernel,iterations = 1)
+            color_mask = cv2.morphologyEx(color_mask, cv2.MORPH_OPEN,  small_kernel, iterations = 1)
 
             contours,hierarchy = cv2.findContours(color_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
             if (contours):
@@ -93,6 +95,10 @@ class Camera:
             cv2.imshow("Camera", frame)
 
             if cv2.waitKey(1)==ord('q'):
+                data = {'hsv': {'min': [int(l_h),int(l_s),int(l_v)], 'max': [int(u_h),int(u_s),int(u_v)]}}
+                with open(calbiration_filename,'w') as file:
+                    yaml.dump(data,file)
+                time.sleep(0.5)
                 break
         cv2.destroyAllWindows()
 # ------------------------------------------
