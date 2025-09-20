@@ -17,7 +17,8 @@ class Camera:
     """
     def __init__(
         self, 
-        message_queue :  type[JoinableQueue] | None = None,
+        battery_queue  : type[JoinableQueue] | None = None,
+        tracking_queue : type[JoinableQueue] | None = None,
         log : bool = False,
         logfile: str = "PiCamMod3.conf"
     ):
@@ -38,10 +39,10 @@ class Camera:
         cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
 
-        self.has_message = False
-        if message_queue != None:
-            self.message_queue = message_queue
-            self.has_message = True
+        self.battery_message = False
+        if battery_queue != None:
+            self.battery_queue = battery_queue
+            self.battery_message = True
         
         self.picam2.start()
 # ------------------------------------------
@@ -59,10 +60,10 @@ class Camera:
             #print(1/(t2-t1))
             t1 = t2
             
-            if self.has_message:
-                if self.message_queue.empty() == False :
+            if self.battery_message:
+                if self.battery_queue.empty() == False :
                     #print(self.message_queue.get())
-                    volts = self.message_queue.get()
+                    volts = self.battery_queue.get()
             
             frame = cv2.putText(frame, volts, (50,50), cv2.FONT_HERSHEY_SIMPLEX, 
                               1, (255, 0, 0), 3, cv2.LINE_AA)
@@ -115,10 +116,10 @@ class Camera:
                     cv2.drawContours(frame,contours,0,(0,0,255),5)
                 t1 = t2
             #-------------------------------
-            if self.has_message:
-                if self.message_queue.empty() == False :
+            if self.battery_message:
+                if self.battery_queue.empty() == False :
                     #print(self.message_queue.get())
-                    volts = self.message_queue.get()
+                    volts = self.battery_queue.get()
             
             cv2.putText(frame, volts, (50,50), cv2.FONT_HERSHEY_SIMPLEX, 
                         1, (255, 0, 0), 3, cv2.LINE_AA)
