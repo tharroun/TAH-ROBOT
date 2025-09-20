@@ -17,7 +17,7 @@ from camera  import Camera
 
 def robot_see(message_queue : type[multiprocessing.JoinableQueue]):
     my_camera = Camera(message_queue = message_queue)
-    my_camera.start()
+    my_camera.view()
     #my_camera.deinit()
 
 async def gamepad_control() :
