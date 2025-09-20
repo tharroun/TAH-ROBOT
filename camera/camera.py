@@ -4,6 +4,7 @@ from multiprocessing import JoinableQueue
 import pprint
 from picamera2 import Picamera2
 from os.path import exists
+import numpy
 
 small_kernel   = numpy.ones((3, 3), numpy.uint8)
 medium_kernel  = numpy.ones((6, 6), numpy.uint8)
