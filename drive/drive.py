@@ -15,8 +15,8 @@ from gamepad import Gamepad
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/camera')
 from camera  import Camera
 
-def robot_see(message_queue : type[multiprocessing.JoinableQueue]):
-    my_camera = Camera(message_queue = message_queue)
+def robot_see(battery_queue : type[multiprocessing.JoinableQueue]):
+    my_camera = Camera(battery_queue = battery_queue)
     my_camera.view()
     #my_camera.deinit()
 
