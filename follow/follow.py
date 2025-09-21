@@ -2,9 +2,8 @@
 #coding=utf8
 import sys
 import asyncio
-import signal
-import functools
 import multiprocessing
+import enum 
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/servos')
 from servos  import Servos
@@ -15,15 +14,29 @@ from gamepad import Gamepad
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/camera')
 from camera  import Camera
 
+class PROCESS_ACTION(enum.Enum):
+    KILL_THREAD = object() 
+    LOST_OBJECT = object()
+
 # -------------------------------------------
-def robot_servo(servos_instance : Servos | None = None,
+def robot_servo(servos_instance : Servos,
                 vision_queue : type[multiprocessing.JoinableQueue]):
+    while True:
+        data = vision_queue.get()
+        if data is PROCESS_ACTION.KILL_THREAD:
+            vision_queue.task_done()
+            break
+        elif data is PROCESS_ACTION.LOST_OBJECT:
+            pass
+        else :
+            print(data)
+        vision_queue.task_done()
     return
 # -------------------------------------------
 
 # -------------------------------------------
 def robot_see(battery_queue : type[multiprocessing.JoinableQueue],
-              tracking_queue : type[multiprocessing.JoinableQueue] | None):
+              tracking_queue : type[multiprocessing.JoinableQueue]):
     my_camera = Camera(battery_queue  = battery_queue,
                        tracking_queue = tracking_queue)
     my_camera.track()
@@ -52,8 +65,11 @@ async def follow_control() :
                                   my_gamepad.battery_loop())  
     
     vision_process.terminate()
+
+    my_tracking.put(PROCESS_ACTION.KILL_THREAD)
     servo_process.terminate()
     my_servos.deinit()
+    
     my_motors.deinit()
 # -------------------------------------------
 

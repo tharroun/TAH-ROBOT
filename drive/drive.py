@@ -2,9 +2,9 @@
 #coding=utf8
 import sys
 import asyncio
-import signal
-import functools
 import multiprocessing
+import keyboard
+
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/servos')
 from servos  import Servos
@@ -15,10 +15,15 @@ from gamepad import Gamepad
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/camera')
 from camera  import Camera
 
+# -------------------------------------------
 def robot_see(my_battery : type[multiprocessing.JoinableQueue]):
     my_camera  = Camera(battery_queue = my_battery)
     my_camera.view()
+    my_camera.deinit()
+    return
+# -------------------------------------------
 
+# -------------------------------------------
 async def drive_control() :
     my_servos  = Servos()
     my_motors  = Motors()
@@ -34,11 +39,11 @@ async def drive_control() :
     future = await asyncio.gather(my_gamepad.event_loop(),
                                   my_gamepad.drive_loop(),
                                   my_gamepad.battery_loop())  
-    
-    vision_process.terminate()
+    keyboard.send('q')
+    vision_process.join()
     my_servos.deinit()
     my_motors.deinit()
-    my_camera.deinit()
+# -------------------------------------------
 
 if __name__ == "__main__":
     asyncio.run(drive_control())
