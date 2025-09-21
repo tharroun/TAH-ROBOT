@@ -118,7 +118,6 @@ All other data is shunted to log.
                         start = self.recv_buffer.index( ':' ) + 1
                         end   = self.recv_buffer.index( '#', start )
                         self.queue_battery.append(self.recv_buffer[start:end])
-                        print(self.queue_battery)
                     except ValueError:
                         if self.log: self.logger.info("Cannot parse battery information.")
                         self.queue_battery.append('Err')
@@ -193,6 +192,7 @@ All other data is shunted to log.
     def get_battery(self) -> str :
         self.send_data("$read_vol#")
         time.sleep(0.2)
+        print(self.queue_battery)
         return self.queue_battery[0]
 # -----------------------------------
 
