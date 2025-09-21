@@ -62,7 +62,7 @@ class Motors:
             self.recv_buffer    = ""
             self.queue_battery  = collections.deque(maxlen=1)
             self.queue_battery.append('Unk')
-            print(id(self.queue_battery))
+            print(id(self.queue_battery),self.queue_battery[0])
             if self.log: self.logger.info("Started listening to serial port.")
 
         self.set_motor_type(1)
@@ -119,7 +119,7 @@ All other data is shunted to log.
                         start = self.recv_buffer.index( ':' ) + 1
                         end   = self.recv_buffer.index( '#', start )
                         self.queue_battery.append(self.recv_buffer[start:end])
-                        print(id(self.queue_battery))
+                        print(id(self.queue_battery),self.queue_battery[0])
                     except ValueError:
                         if self.log: self.logger.info("Cannot parse battery information.")
                         self.queue_battery.append('Err')
@@ -194,7 +194,8 @@ All other data is shunted to log.
     def get_battery(self) -> str :
         self.send_data("$read_vol#")
         time.sleep(0.2)
-        print(id(self.queue_battery))
+        print(id(self.queue_battery),self.queue_battery[0])
+        print(self.queue_battery.pop())
         return self.queue_battery[0]
 # -----------------------------------
 
