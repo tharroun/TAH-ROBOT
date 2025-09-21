@@ -53,7 +53,7 @@ class Camera:
         cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
         cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
-        
+
         volts = "0.0 V"
         while True:
             im  = self.picam2.capture_array()
@@ -150,6 +150,6 @@ class Camera:
 
 if __name__ == "__main__":
     my_camera = Camera()
-    my_camera.view()
+    my_camera.track()
     my_camera.deinit()
 
