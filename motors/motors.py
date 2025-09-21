@@ -57,7 +57,7 @@ class Motors:
         self.enable_recv = enable_recv
         if enable_recv:
             self.stop_listening = False
-            self.listening      = threading.Thread(target=self._listen_thread, daemon=True)
+            self.listening      = threading.Thread(target=self._listen_thread, daemon=False)
             self.listening.start()
             self.recv_buffer    = ""
             self.queue_battery  = collections.deque(maxlen=1)
