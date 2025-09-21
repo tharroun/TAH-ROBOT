@@ -106,10 +106,10 @@ async def gamepad_main_loop(my_servos     : Servos,
 #-----------------------------------
 
 #-----------------------------------
-def robot_control(my_sermy_servos     : Servos,
-                            my_motors     : Motors,
-                            my_gamepad    : Gamepad,
-                            battery_queue : type[multiprocessing.JoinableQueue]) :
+def robot_control(my_servos     : Servos,
+                  my_motors     : Motors,
+                  my_gamepad    : Gamepad,
+                  battery_queue : type[multiprocessing.JoinableQueue]) :
     asyncio.run(gamepad_main_loop(my_servos,my_motors,my_gamepad,battery_queue))
     print("Finished robot_control")
     return
