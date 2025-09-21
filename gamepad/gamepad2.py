@@ -71,7 +71,7 @@ class Gamepad:
 
 # -----------------------------------
 async def event_loop(gamepad : Gamepad,
-                     servos : Servos) -> bool:
+                     servos  : Servos) -> bool:
     sx,sy=0,0
     async for event in gamepad.gamepad.async_read_loop() :
         if event.code == evdev.ecodes.BTN_MODE and event.value == 0:
@@ -91,13 +91,13 @@ async def event_loop(gamepad : Gamepad,
                 if gamepad.rotation_speed > 900 : gamepad.rotation_speed = 900
                 if gamepad.rotation_speed < 0   : gamepad.rotation_speed = 0
         
-        print("Finished event_loop")
-        return True
+    print("Finished event_loop")
+    return True
 # -----------------------------------
 
 # -----------------------------------
 def _update_servos(gamepad : Gamepad,
-                   servos : Servos,
+                   servos  : Servos,
                    sx: float = 0,
                    sy: float = 0) :
     deg_x = math.trunc(gamepad.servos_mx*sx+gamepad.servos_bx)
