@@ -4,70 +4,14 @@ import evdev
 import math
 import sys
 import asyncio
-from   multiprocessing import JoinableQueue
+import multiprocessing
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/servos')
 from servos import Servos
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/motors')
 from motors import Motors
-
-class Gamepad:
-    '''
-    8BitDo SN30Pro 
-    Appears as X-box controller on the RPi5.
-    '''
-    def __init__(
-        self,
-    ):
-
-        found_gamepad = False
-        devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
-        for device in devices:
-            if 'X-Box' in device.name:
-                found_gamepad = True
-                break
-        if found_gamepad: 
-            self.gamepad = evdev.InputDevice(device.path) # type: ignore
-        else :
-            raise RuntimeError(f"Failed to initialize gamepad.")
-        # gamepad_str = pprint.pformat(self.gamepad.capabilities(verbose=True))
-
-        # IT SOMETIMES SEEMS THAT THE EVENTIO QUEUE NEEDS TO BE FLUSHED
-        # WHEN STARTING THE PROGRAM. MAYBE IT'S ASYNCIO?
-        while self.gamepad.read_one():
-            pass
-        self.running = True
-
-        # - SERVOS -----
-        # RIGHT STICK
-        # LINEAR MAPING OF STICK (MIN,MAX) -> (0,180) PWM VALUES
-        absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_RX)
-        self.servos_mx = -180.0/math.fabs(absinfo.max-absinfo.min)
-        self.servos_bx = -self.servos_mx*absinfo.max
-        absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_RY)
-        self.servos_my = 153.0/math.fabs(absinfo.max-absinfo.min)
-        self.servos_by = -self.servos_my*absinfo.min
-        
-        # - MOTORS -----
-        # LEFT STICK
-        # LINEAR MAPING OF STICK ABS(MIN,MAX) -> (0,1500) PWM SPEED UNITS
-        #self.gamepad.set_absinfo(evdev.ecodes.ABS_X,flat=10,fuzz=20)
-        #self.gamepad.set_absinfo(evdev.ecodes.ABS_Y,flat=10,fuzz=20)
-        absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_X)
-        if math.fabs(absinfo.max) > math.fabs(absinfo.min) : max = math.fabs(absinfo.max)
-        else : max = math.fabs(absinfo.max)
-        self.motors_mx = 1200.0/math.fabs(max)
-        absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_Y)
-        if math.fabs(absinfo.max) > math.fabs(absinfo.min) : max = math.fabs(absinfo.max)
-        else : max = math.fabs(absinfo.max)
-        self.motors_my = 1200.0/math.fabs(max)
-        self.rotation_speed = 300
-    
-    def deinit(self):
-        self.running = False
-        self.gamepad.close()
-        
-# -----------------------------------
+sys.path.append('/home/tah/GitHub/TAH-ROBOT/gamepad')
+from gamepad2 import Gamepad
 
 # -----------------------------------
 async def event_loop(gamepad : Gamepad,
@@ -144,22 +88,40 @@ async def battery_loop(gamepad: Gamepad,
     return True
 #-----------------------------------
 
-async def gamepad_control() :
-    my_servos  = Servos()
-    my_motors  = Motors()
-    my_gamepad = Gamepad()
-
+#-----------------------------------
+async def gamepad_main_loop(my_servos : Servos,
+                            my_motors : Motors,
+                            my_gamepad : Gamepad) :
     loop   = asyncio.get_running_loop()
     future = await asyncio.gather(event_loop(my_gamepad,my_servos),
                                   drive_loop(my_gamepad,my_motors),
                                   battery_loop(my_gamepad,my_motors))  
+#-----------------------------------
+
+#-----------------------------------
+def robot_control(my_servos : Servos,
+                  my_motors : Motors,
+                  my_gamepad : Gamepad) :
+    asyncio.run(gamepad_main_loop(my_servos,my_motors,my_gamepad))
+    return
+#-----------------------------------
+if __name__ == "__main__":
     
+    my_servos  = Servos()
+    my_motors  = Motors()
+    my_gamepad = Gamepad()
+
+    gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos,my_motors,my_gamepad,))
+    gamepad_process.start()
+
+    #vision_process = multiprocessing.Process(target=robot_see, args=(my_battery,))
+    #vision_process.start()
+
+    gamepad_process.join()
     my_servos.deinit()
     my_motors.deinit()
     my_gamepad.deinit()
 
-if __name__ == "__main__":
-    asyncio.run(gamepad_control())
 
 
 

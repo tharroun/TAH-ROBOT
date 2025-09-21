@@ -6,10 +6,7 @@ import sys
 import asyncio
 from   multiprocessing import JoinableQueue
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
-sys.path.append('/home/tah/GitHub/TAH-ROBOT/servos')
-from servos import Servos
-sys.path.append('/home/tah/GitHub/TAH-ROBOT/motors')
-from motors import Motors
+
 
 class Gamepad:
     '''
@@ -36,6 +33,7 @@ class Gamepad:
         # WHEN STARTING THE PROGRAM. MAYBE IT'S ASYNCIO?
         while self.gamepad.read_one():
             pass
+
         self.running = True
 
         # - SERVOS -----
@@ -50,18 +48,19 @@ class Gamepad:
         
         # - MOTORS -----
         # LEFT STICK
-        # LINEAR MAPING OF STICK ABS(MIN,MAX) -> (0,1500) PWM SPEED UNITS
+        # LINEAR MAPING OF STICK (0,ABS(MIN,MAX)) -> (0,1200) PWM SPEED UNITS
         #self.gamepad.set_absinfo(evdev.ecodes.ABS_X,flat=10,fuzz=20)
         #self.gamepad.set_absinfo(evdev.ecodes.ABS_Y,flat=10,fuzz=20)
         absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_X)
         if math.fabs(absinfo.max) > math.fabs(absinfo.min) : max = math.fabs(absinfo.max)
-        else : max = math.fabs(absinfo.max)
+        else : max = math.fabs(absinfo.min)
         self.motors_mx = 1200.0/math.fabs(max)
         absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_Y)
         if math.fabs(absinfo.max) > math.fabs(absinfo.min) : max = math.fabs(absinfo.max)
-        else : max = math.fabs(absinfo.max)
-        self.motors_my = 1200.0/math.fabs(max)
+        else : max = math.fabs(absinfo.min)
+        self.motors_my = 1200.0/max
         self.rotation_speed = 300
+        return
     
     def deinit(self):
         self.running = False
@@ -70,8 +69,7 @@ class Gamepad:
 # -----------------------------------
 
 # -----------------------------------
-async def event_loop(gamepad : Gamepad,
-                     servos  : Servos) -> bool:
+async def event_loop(gamepad : Gamepad) -> bool:
     sx,sy=0,0
     async for event in gamepad.gamepad.async_read_loop() :
         if event.code == evdev.ecodes.BTN_MODE and event.value == 0:
@@ -83,17 +81,12 @@ async def event_loop(gamepad : Gamepad,
                 print("RY",event.value)
             if event.code == evdev.ecodes.ABS_RX : 
                 print("RY",event.value)
-            if event.code == evdev.ecodes.ABS_HAT0Y :
-                if event.value ==  1 : gamepad.rotation_speed -= 50
-                if event.value == -1 : gamepad.rotation_speed += 50
-                if gamepad.rotation_speed > 900 : gamepad.rotation_speed = 900
-                if gamepad.rotation_speed < 0   : gamepad.rotation_speed = 0
         
     print("Finished event_loop")
     return True
 # -----------------------------------
 
-
+# -----------------------------------
 async def gamepad_control() :
     my_gamepad = Gamepad()
 
@@ -101,6 +94,7 @@ async def gamepad_control() :
     future = await asyncio.gather(event_loop(my_gamepad))  
 
     my_gamepad.deinit()
+# -----------------------------------
 
 if __name__ == "__main__":
     asyncio.run(gamepad_control())
