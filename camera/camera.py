@@ -125,16 +125,16 @@ class Camera:
                 if (len(contours)>1) : 
                     contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
                 # ------------------------------------------------
-                # area = cv2.contourArea(contours[0])
-                # arclength = cv2.arcLength(contours[0],True)
-                # circularity = 4*numpy.pi*area/(arclength*arclength)
+                area = cv2.contourArea(contours[0])
+                arclength = cv2.arcLength(contours[0],True)
+                circularity = 4*numpy.pi*area/(arclength*arclength)
                 # NEXT TIME:https://docs.opencv.org/4.11.0/d4/d70/tutorial_hough_circle.html
                 # ------------------------------------------------
                 M = cv2.moments(contours[0])
                 cx = int(M['m10']/M['m00'])
                 cy = int(M['m01']/M['m00'])
                 radius = int(numpy.sqrt(M['m00']/numpy.pi))
-                if radius > 10:
+                if radius > 10 and circularity > 0.7:
                     t2 = time.perf_counter() 
                     fps = numpy.round(1/(t2-t1),1)
                     t1 = t2
@@ -160,7 +160,7 @@ class Camera:
                         thickness = 2, 
                         lineType = cv2.LINE_8)            
             #-------------------------------
-            #cv2.imshow("Camera", frame)
+            cv2.imshow("Camera", frame)
             #-------------------------------
             if cv2.waitKey(1)==ord('q'):
                 break

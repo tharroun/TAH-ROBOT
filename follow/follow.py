@@ -48,7 +48,7 @@ def robot_servo(servos_instance : Servos,
                 #position_x = int(servo_x - control/4.0) 
                 new_x = sx
             servos_instance.servo0.angle = new_x
-            print(new_x)
+            #print(new_x)
         #------
         vision_queue.task_done()
     return
