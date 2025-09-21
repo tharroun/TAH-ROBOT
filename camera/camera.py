@@ -35,6 +35,10 @@ class Camera:
         self.picam2.align_configuration(config)
         self.picam2.configure(config)
 
+        cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
+        cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
+
         self.battery_message = False
         if battery_queue != None:
             self.battery_queue = battery_queue
@@ -44,15 +48,12 @@ class Camera:
         if tracking_queue != None:
             self.tracking_queue = tracking_queue
             self.tracking_object = True
+        
+        self.picam2.start()
 # ------------------------------------------
 
 # ------------------------------------------
     def view(self):
-        cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
-        cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
-        self.picam2.start()
-
         volts = "0.0 V"
         while True:
             im  = self.picam2.capture_array()
@@ -89,12 +90,7 @@ class Camera:
         COLOR_MIN = numpy.array(color_range['hsv']['min'],numpy.uint8)
         COLOR_MAX = numpy.array(color_range['hsv']['max'],numpy.uint8)
         # ------
-        
-        cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
-        cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
-        self.picam2.start()
-        
+
         t1 = time.time() 
         volts = "0.0 V"
         while True:
