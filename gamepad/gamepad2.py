@@ -62,6 +62,9 @@ class Gamepad:
         else : max = math.fabs(absinfo.max)
         self.motors_my = 1200.0/math.fabs(max)
         self.rotation_speed = 300
+    
+    def deinit(self):
+        self.gamepad.close()
         
 # -----------------------------------
 
@@ -86,7 +89,7 @@ async def event_loop(gamepad : Gamepad,
                 if event.value == -1 : gamepad.rotation_speed += 50
                 if gamepad.rotation_speed > 900 : gamepad.rotation_speed = 900
                 if gamepad.rotation_speed < 0   : gamepad.rotation_speed = 0
-        gamepad.gamepad.close()
+        
         print("Finished event_loop")
         return True
 # -----------------------------------
@@ -146,12 +149,13 @@ async def gamepad_control() :
     my_gamepad = Gamepad()
 
     loop   = asyncio.get_running_loop()
-    future = await asyncio.gather(my_gamepad.event_loop(),
-                                  my_gamepad.drive_loop(),
-                                  my_gamepad.battery_loop())  
+    future = await asyncio.gather(event_loop(my_gamepad,my_servos),
+                                  drive_loop(my_gamepad,my_motors),
+                                  battery_loop(my_gamepad,my_motors))  
     
     my_servos.deinit()
     my_motors.deinit()
+    my_gamepad.deinit()
 
 if __name__ == "__main__":
     asyncio.run(gamepad_control())
