@@ -104,6 +104,10 @@ class Camera:
         COLOR_MAX = numpy.array(color_range['hsv']['max'],numpy.uint8)
         # ------
 
+        if self.tracking_object:
+            #self.tracking_queue.put((596//2,324//2))
+            self.tracking_queue.put((800//2,480//2))
+
         t1 = time.perf_counter() 
         volts = "0.0 V"
         while True:
@@ -143,7 +147,7 @@ class Camera:
                                 lineType = cv2.LINE_8)
                     cv2.drawContours(frame,contours,0,(0,0,255),5)
                     if self.tracking_object:
-                        self.tracking_queue.put((fps,cx,cy))
+                        self.tracking_queue.put((cx,cy,radius,fps))
             #-------------------------------
             if self.battery_message:
                 if self.battery_queue.empty() == False :
