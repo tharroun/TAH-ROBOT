@@ -114,6 +114,7 @@ All other data is shunted to log.
                 if self.recv_buffer.startswith('$M'):
                     print(self.recv_buffer)
                 elif self.recv_buffer.startswith('$B'):
+                    print(self.recv_buffer)
                     try:
                         start = self.recv_buffer.index( ':' ) + 1
                         end   = self.recv_buffer.index( '#', start )
@@ -191,7 +192,6 @@ All other data is shunted to log.
 # -----------------------------------
     def get_battery(self) -> str :
         self.send_data("$read_vol#")
-        print("here")
         time.sleep(0.2)
         return self.queue_battery[0]
 # -----------------------------------
