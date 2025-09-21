@@ -35,10 +35,6 @@ class Camera:
         self.picam2.align_configuration(config)
         self.picam2.configure(config)
 
-        cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
-        cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
-
         self.battery_message = False
         if battery_queue != None:
             self.battery_queue = battery_queue
@@ -54,6 +50,10 @@ class Camera:
 
 # ------------------------------------------
     def view(self):
+        cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
+        cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
+        
         volts = "0.0 V"
         while True:
             im  = self.picam2.capture_array()
