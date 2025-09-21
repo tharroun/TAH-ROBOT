@@ -105,8 +105,8 @@ class Camera:
         # ------
 
         if self.tracking_object:
-            #self.tracking_queue.put((596//2,324//2))
-            self.tracking_queue.put((800//2,480//2))
+            #self.tracking_queue.put((596,324))
+            self.tracking_queue.put((800,480))
 
         t1 = time.perf_counter() 
         volts = "0.0 V"

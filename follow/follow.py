@@ -75,8 +75,8 @@ async def follow_control() :
 
     servo_queue = multiprocessing.JoinableQueue()
     vision_process = multiprocessing.Process(target=robot_see, args=(my_battery, servo_queue,))
-    vision_process.start()
     servo_process = multiprocessing.Process(target=robot_servo, args=(my_servos, servo_queue,))
+    vision_process.start()
     servo_process.start()
 
     gamepad_loop   = asyncio.get_running_loop()
