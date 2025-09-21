@@ -90,6 +90,10 @@ class Camera:
         COLOR_MIN = numpy.array(color_range['hsv']['min'],numpy.uint8)
         COLOR_MAX = numpy.array(color_range['hsv']['max'],numpy.uint8)
         # ------
+        
+        cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
+        cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
 
         t1 = time.time() 
         volts = "0.0 V"
