@@ -27,8 +27,6 @@ def robot_servo(servos_instance : Servos,
     
     pidx = MyPID(0.08,0.001,0.002)
     pidy = MyPID(0.001,0.0,0.0)
-    sx = servos_instance.servo0.angle
-    sy = servos_instance.servo1.angle
 
     (width,height) = vision_queue.get()
     vision_queue.task_done()
@@ -45,17 +43,15 @@ def robot_servo(servos_instance : Servos,
             pass
         else :
             move_x = pidx.pid(cX, data[0], data[3])
-            new_x = int(sx + move_x)
-            if new_x < 0 or new_x > 180: 
-                #position_x = int(servo_x - control/4.0) 
-                new_x = sx
-            servos_instance.servo0.angle = new_x
+            new_x = int(servos_instance.servo0.angle + move_x)
+            if new_x >= 0 or new_x <= 180: 
+                servos_instance.servo0.angle = new_x
+            #---
             move_y = pidy.pid(cY, data[1], data[3])
-            new_y = int(sy + move_y)
-            if new_y < 0 or new_y > 180: 
-                #position_x = int(servo_x - control/4.0) 
-                new_y = sy
-            servos_instance.servo1.angle = new_y
+            new_y = int(servos_instance.servo1.angle + move_y)
+            if new_y >= 0 or new_y >= 180: 
+                servos_instance.servo1.angle = new_y
+            #---
             #print(new_x)
         #------
         vision_queue.task_done()
