@@ -74,8 +74,8 @@ class Gamepad:
             raise RuntimeError(f"Must supply a valid motors instance, or set control_motors to False.")
         # LEFT STICK
         # LINEAR MAPING OF STICK ABS(MIN,MAX) -> (0,1500) PWM SPEED UNITS
-        self.gamepad.set_absinfo(evdev.ecodes.ABS_X,flat=10,fuzz=20)
-        self.gamepad.set_absinfo(evdev.ecodes.ABS_Y,flat=10,fuzz=20)
+        #self.gamepad.set_absinfo(evdev.ecodes.ABS_X,flat=10,fuzz=20)
+        #self.gamepad.set_absinfo(evdev.ecodes.ABS_Y,flat=10,fuzz=20)
         absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_X)
         if math.fabs(absinfo.max) > math.fabs(absinfo.min) : max = math.fabs(absinfo.max)
         else : max = math.fabs(absinfo.max)
