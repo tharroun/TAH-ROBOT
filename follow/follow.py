@@ -25,7 +25,7 @@ class PROCESS_ACTION(enum.Enum):
 def robot_servo(servos_instance : Servos,
                 vision_queue : type[multiprocessing.JoinableQueue]):
     
-    pidx = MyPID(0.15,0.0,0.005)
+    pidx = MyPID(0.08,0.0,0.002)
     sx = servos_instance.servo0.angle
 
     (width,height) = vision_queue.get()
