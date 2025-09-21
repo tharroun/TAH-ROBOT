@@ -133,7 +133,7 @@ if __name__ == "__main__":
     vision_process = multiprocessing.Process(target=robot_see, args=(my_battery,))
     vision_process.start()
 
-    gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos,my_motors,my_gamepad,))
+    gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos,my_motors,my_gamepad,my_battery))
     gamepad_process.start()
 
     gamepad_process.join()
