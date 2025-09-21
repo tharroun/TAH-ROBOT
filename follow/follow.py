@@ -26,7 +26,9 @@ def robot_servo(servos_instance : Servos,
                 vision_queue : type[multiprocessing.JoinableQueue]):
     
     pidx = MyPID(0.08,0.001,0.002)
+    pidy = MyPID(0.04,0.0005,0.001)
     sx = servos_instance.servo0.angle
+    sy = servos_instance.servo1.angle
 
     (width,height) = vision_queue.get()
     vision_queue.task_done()
@@ -48,6 +50,12 @@ def robot_servo(servos_instance : Servos,
                 #position_x = int(servo_x - control/4.0) 
                 new_x = sx
             servos_instance.servo0.angle = new_x
+            move_y = pidy.pid(cX, data[1], data[3])
+            new_y = int(sy + move_y)
+            if new_y < 0 or new_y > 180: 
+                #position_x = int(servo_x - control/4.0) 
+                new_y = sy
+            servos_instance.servo1.angle = new_y
             #print(new_x)
         #------
         vision_queue.task_done()

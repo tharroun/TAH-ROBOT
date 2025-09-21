@@ -134,8 +134,8 @@ class Camera:
                 cx = int(M['m10']/M['m00'])
                 cy = int(M['m01']/M['m00'])
                 radius = int(numpy.sqrt(M['m00']/numpy.pi))
-                if circularity > 0.6 and circularity < 1.4:
-                #if radius > 10:
+                #if circularity > 0.6 and circularity < 1.4:
+                if radius > 10:
                     t2 = time.perf_counter() 
                     fps = numpy.round(1/(t2-t1),1)
                     t1 = t2
