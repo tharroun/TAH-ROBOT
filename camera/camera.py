@@ -69,7 +69,7 @@ class Camera:
                         fontScale = 1, 
                         color = (255, 0, 0), 
                         thickness = 2, 
-                        lintType = cv2.LINE_8)
+                        lineType = cv2.LINE_8)
             #-------------------------------
             cv2.imshow("Camera", frame)
             #-------------------------------
@@ -131,7 +131,7 @@ class Camera:
                         fontScale = 1, 
                         color = (255, 0, 0), 
                         thickness = 2, 
-                        lintType = cv2.LINE_8)
+                        lineType = cv2.LINE_8)
             #-------------------------------
             cv2.imshow("Camera", frame)
             #-------------------------------
@@ -150,6 +150,6 @@ class Camera:
 
 if __name__ == "__main__":
     my_camera = Camera()
-    my_camera.track()
+    my_camera.view()
     my_camera.deinit()
 
