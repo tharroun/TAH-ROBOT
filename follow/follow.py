@@ -48,7 +48,7 @@ def robot_servo(servos_instance : Servos,
                 servos_instance.servo0.angle = int(new_x)
             #---
             move_y = pidy.pid(cY, data[1], data[3])
-            new_y = int(servos_instance.servo1.angle + move_y)
+            new_y = int(servos_instance.servo1.angle - move_y)
             print(move_x,new_x)
             if new_y >= 0 and new_y <= 180: 
                 servos_instance.servo1.angle = int(new_y)
