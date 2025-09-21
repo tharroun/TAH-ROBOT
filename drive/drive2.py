@@ -95,7 +95,8 @@ async def gamepad_main_loop(my_servos : Servos,
     loop   = asyncio.get_running_loop()
     future = await asyncio.gather(event_loop(my_gamepad,my_servos),
                                   drive_loop(my_gamepad,my_motors),
-                                  battery_loop(my_gamepad,my_motors))  
+                                  battery_loop(my_gamepad,my_motors)) 
+    print("Finished gamepad_main_loop")
 #-----------------------------------
 
 #-----------------------------------
@@ -103,6 +104,7 @@ def robot_control(my_servos : Servos,
                   my_motors : Motors,
                   my_gamepad : Gamepad) :
     asyncio.run(gamepad_main_loop(my_servos,my_motors,my_gamepad))
+    print("Finished robot_control")
     return
 #-----------------------------------
 if __name__ == "__main__":
