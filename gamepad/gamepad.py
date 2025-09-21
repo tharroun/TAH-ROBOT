@@ -60,7 +60,7 @@ class Gamepad:
         # RIGHT STICK
         # LINEAR MAPING OF STICK (MIN,MAX) -> (0,180) PWM VALUES
         absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_RX)
-        self.servos_mx = 180.0/math.fabs(absinfo.max-absinfo.min)
+        self.servos_mx = -180.0/math.fabs(absinfo.max-absinfo.min)
         self.servos_bx = -self.servos_mx*absinfo.min
         absinfo = self.gamepad.absinfo(evdev.ecodes.ABS_RY)
         self.servos_my = 153.0/math.fabs(absinfo.max-absinfo.min)
