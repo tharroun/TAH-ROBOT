@@ -44,8 +44,6 @@ class Camera:
         if tracking_queue != None:
             self.tracking_queue = tracking_queue
             self.tracking_object = True
-        
-        self.picam2.start()
 # ------------------------------------------
 
 # ------------------------------------------
@@ -53,6 +51,7 @@ class Camera:
         cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
         cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
+        self.picam2.start()
 
         volts = "0.0 V"
         while True:
@@ -94,7 +93,8 @@ class Camera:
         cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
         cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
-
+        self.picam2.start()
+        
         t1 = time.time() 
         volts = "0.0 V"
         while True:
