@@ -85,7 +85,6 @@ async def battery_loop(gamepad       : Gamepad,
                        battery_queue : type[multiprocessing.JoinableQueue]):
     while gamepad.running :
         volts = motors.get_battery()
-        print(f"Motor voltage: {volts}")
         battery_queue.put(volts) # type: ignore
         await asyncio.sleep(2.0)
     print("Finished battery_loop")
