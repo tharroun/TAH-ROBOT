@@ -64,6 +64,7 @@ class Gamepad:
         self.rotation_speed = 300
     
     def deinit(self):
+        self.running = False
         self.gamepad.close()
         
 # -----------------------------------
@@ -135,7 +136,7 @@ async def drive_loop(gamepad : Gamepad,
 # -----------------------------------
 async def battery_loop(gamepad: Gamepad,
                        motors : Motors) -> bool:
-    while gamepad.control_motors :
+    while gamepad.running :
         volts = motors.get_battery()
         print(f"Motor voltage: {volts}")
         await asyncio.sleep(2.0)
