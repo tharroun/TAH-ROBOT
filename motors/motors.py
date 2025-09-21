@@ -62,10 +62,9 @@ class Motors:
             self.listening.start()
             self.recv_buffer    = ""
             self.queue_battery  = queue.Queue(maxsize=1)
-            self.queue_battery.put('Unk')
+            self.queue_battery.put_nowait('Unk')
             #self.queue_battery  = collections.deque(maxlen=1)
             #self.queue_battery.append('Unk')
-            #print(id(self.queue_battery),self.queue_battery[0])
             if self.log: self.logger.info("Started listening to serial port.")
 
         self.set_motor_type(1)
@@ -121,11 +120,10 @@ All other data is shunted to log.
                     try:
                         start = self.recv_buffer.index( ':' ) + 1
                         end   = self.recv_buffer.index( '#', start )
-                        if self.queue_battery.full():
-                            d = self.queue_battery.get()
-                        self.queue_battery.put(self.recv_buffer[start:end])
+                        if self.queue_battery.empty() == False:
+                            d = self.queue_battery.get_nowait()
+                        self.queue_battery.put_nowait(self.recv_buffer[start:end])
                         #self.queue_battery.append(self.recv_buffer[start:end])
-                        #print(id(self.queue_battery),self.queue_battery[0])
                     except ValueError:
                         if self.log: self.logger.info("Cannot parse battery information.")
                         self.queue_battery.append('Err')
@@ -159,7 +157,6 @@ All other data is shunted to log.
 
 # -----------------------------------
     def send_data(self, data: str):
-        #print(data)
         self.port.write(data.encode())  
         self.port.flush()
         time.sleep(0.1)
@@ -200,7 +197,7 @@ All other data is shunted to log.
     def get_battery(self) -> str :
         self.send_data("$read_vol#")
         time.sleep(0.2)
-        d = self.queue_battery.get()
+        d = self.queue_battery.get_nowait()
         print(d)
         return d
 # -----------------------------------
