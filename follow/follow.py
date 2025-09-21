@@ -26,7 +26,7 @@ def robot_servo(servos_instance : Servos,
                 vision_queue : type[multiprocessing.JoinableQueue]):
     
     pidx = MyPID(0.08,0.001,0.002)
-    pidy = MyPID(0.04,0.0005,0.001)
+    pidy = MyPID(0.001,0.0,0.0)
     sx = servos_instance.servo0.angle
     sy = servos_instance.servo1.angle
 
