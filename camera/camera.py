@@ -74,7 +74,7 @@ class Camera:
                         lineType = cv2.LINE_8)
             #-------------------------------
             t2 = time.perf_counter() 
-            fps = str(numpy.round((t2-t1),2))
+            fps = str(numpy.round(1/(t2-t1),2))+" FPS"
             t1 = t2
             cv2.putText(frame, fps, 
                         org = (40,60), 
