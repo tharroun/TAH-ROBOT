@@ -25,8 +25,8 @@ class PROCESS_ACTION(enum.Enum):
 def robot_servo(servos_instance : Servos,
                 vision_queue : type[multiprocessing.JoinableQueue]):
     
-    pidx = MyPID(0.005,0.0,0.001)
-    pidy = MyPID(0.01,0.0,0.002)
+    pidx = MyPID(0.007,0.001,0.001)
+    pidy = MyPID(0.011,0.001,0.002)
 
     (width,height) = vision_queue.get()
     vision_queue.task_done()
