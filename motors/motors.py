@@ -57,7 +57,7 @@ class Motors:
         self.enable_recv = enable_recv
         if enable_recv:
             self.stop_listening = False
-            self.listening      = threading.Thread(target=self._listen_thread, daemon=False)
+            self.listening      = threading.Thread(target=self._listen_thread, daemon=True)
             self.listening.start()
             self.recv_buffer    = ""
             self.queue_battery  = collections.deque(maxlen=1)
@@ -195,7 +195,6 @@ All other data is shunted to log.
         self.send_data("$read_vol#")
         time.sleep(0.2)
         print(id(self.queue_battery),self.queue_battery[0])
-        print(self.queue_battery.pop())
         return self.queue_battery[0]
 # -----------------------------------
 
