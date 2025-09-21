@@ -62,6 +62,7 @@ class Motors:
             self.recv_buffer    = ""
             self.queue_battery  = collections.deque(maxlen=1)
             self.queue_battery.append('Unk')
+            print(id(self.queue_battery))
             if self.log: self.logger.info("Started listening to serial port.")
 
         self.set_motor_type(1)
