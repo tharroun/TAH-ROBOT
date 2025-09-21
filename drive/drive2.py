@@ -113,13 +113,15 @@ if __name__ == "__main__":
     my_motors  = Motors()
     my_gamepad = Gamepad()
 
-    gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos,my_motors,my_gamepad,))
-    gamepad_process.start()
+    asyncio.run(gamepad_main_loop(my_servos,my_motors,my_gamepad))
+
+    #gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos,my_motors,my_gamepad,))
+    #gamepad_process.start()
 
     #vision_process = multiprocessing.Process(target=robot_see, args=(my_battery,))
     #vision_process.start()
 
-    gamepad_process.join()
+    #gamepad_process.join()
     my_servos.deinit()
     my_motors.deinit()
     my_gamepad.deinit()
