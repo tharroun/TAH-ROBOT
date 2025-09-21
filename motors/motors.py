@@ -114,11 +114,11 @@ All other data is shunted to log.
                 if self.recv_buffer.startswith('$M'):
                     print(self.recv_buffer)
                 elif self.recv_buffer.startswith('$B'):
-                    print(self.recv_buffer)
                     try:
                         start = self.recv_buffer.index( ':' ) + 1
                         end   = self.recv_buffer.index( '#', start )
                         self.queue_battery.append(self.recv_buffer[start:end])
+                        print(self.recv_buffer[start:end])
                     except ValueError:
                         if self.log: self.logger.info("Cannot parse battery information.")
                         self.queue_battery.append('Err')
