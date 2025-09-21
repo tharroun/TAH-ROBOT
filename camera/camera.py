@@ -137,7 +137,8 @@ class Camera:
                 #if circularity > 0.6 and circularity < 1.4:
                 if radius > 10:
                     t2 = time.perf_counter() 
-                    fps = numpy.round(1/(t2-t1),1)
+                    dt = t2-t1
+                    fps = numpy.round(1/dt,1)
                     t1 = t2
                     cv2.putText(frame, str(fps)+" FPS", 
                                 org = (40,70), 
@@ -148,7 +149,7 @@ class Camera:
                                 lineType = cv2.LINE_8)
                     cv2.drawContours(frame,contours,0,(0,0,255),5)
                     if self.tracking_object:
-                        self.tracking_queue.put((cx,cy,radius,fps))
+                        self.tracking_queue.put((cx,cy,radius,dt))
                 else:
                     if self.tracking_object:
                         self.tracking_queue.put((False))
