@@ -55,6 +55,8 @@ class Camera:
 # ------------------------------------------
     def view(self):
         volts = "0.0 V"
+        fps = "0.0 FPS"
+        t1 = time.perf_counter() 
         while True:
             im  = self.picam2.capture_array()
             #frame = cv2.resize(im,(596,324),interpolation = cv2.INTER_CUBIC)
@@ -71,6 +73,15 @@ class Camera:
                         thickness = 2, 
                         lineType = cv2.LINE_8)
             #-------------------------------
+            t2 = time.perf_counter() 
+            fps = str(numpy.round(1/(t2-t1),2))
+            cv2.putText(frame, fps, 
+                        org = (40,50), 
+                        fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
+                        fontScale = 1, 
+                        color = (255, 0, 0), 
+                        thickness = 2, 
+                        lineType = cv2.LINE_8)
             cv2.imshow("Camera", frame)
             #-------------------------------
             if cv2.waitKey(1)==ord('q'):
@@ -91,7 +102,7 @@ class Camera:
         COLOR_MAX = numpy.array(color_range['hsv']['max'],numpy.uint8)
         # ------
 
-        t1 = time.time() 
+        t1 = time.perf_counter() 
         volts = "0.0 V"
         while True:
             im  = self.picam2.capture_array()
@@ -152,6 +163,6 @@ class Camera:
 
 if __name__ == "__main__":
     my_camera = Camera()
-    my_camera.track()
+    my_camera.view()
     my_camera.deinit()
 
