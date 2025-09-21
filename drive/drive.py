@@ -20,7 +20,7 @@ def robot_see(battery_queue : type[multiprocessing.JoinableQueue]):
     my_camera.view()
     #my_camera.deinit()
 
-async def gamepad_control() :
+async def drive_control() :
     my_servos  = Servos()
     my_motors  = Motors()
     my_battery = multiprocessing.JoinableQueue()
@@ -41,7 +41,7 @@ async def gamepad_control() :
     my_motors.deinit()
 
 if __name__ == "__main__":
-    asyncio.run(gamepad_control())
+    asyncio.run(drive_control())
 
 
 
