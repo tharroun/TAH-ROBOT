@@ -191,6 +191,7 @@ All other data is shunted to log.
 # -----------------------------------
     def get_battery(self) -> str :
         self.send_data("$read_vol#")
+        print("here")
         time.sleep(0.2)
         return self.queue_battery[0]
 # -----------------------------------
