@@ -74,7 +74,7 @@ class Camera:
                         lineType = cv2.LINE_8)
             #-------------------------------
             t2 = time.perf_counter()
-            fps = numpy.round(1/(t2-t1),2)
+            fps = numpy.round(1/(t2-t1),1)
             t1 = t2
             cv2.putText(frame, str(fps)+" FPS", 
                         org = (40,70), 
@@ -147,7 +147,7 @@ class Camera:
                         lineType = cv2.LINE_8)
             #-------------------------------
             t2 = time.perf_counter() 
-            fps = numpy.round(1/(t2-t1),2)
+            fps = numpy.round(1/(t2-t1),1)
             t1 = t2
             cv2.putText(frame, str(fps)+" FPS", 
                         org = (40,70), 
@@ -174,6 +174,6 @@ class Camera:
 
 if __name__ == "__main__":
     my_camera = Camera()
-    my_camera.view()
+    my_camera.track()
     my_camera.deinit()
 
