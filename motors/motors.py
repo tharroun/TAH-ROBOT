@@ -62,7 +62,7 @@ class Motors:
             self.listening.start()
             self.recv_buffer    = ""
             self.queue_battery  = queue.Queue(maxsize=1)
-            self.queue_battery.put_nowait('Unk')
+            self.queue_battery.put('Unk')
             #self.queue_battery  = collections.deque(maxlen=1)
             #self.queue_battery.append('Unk')
             if self.log: self.logger.info("Started listening to serial port.")
@@ -120,9 +120,9 @@ All other data is shunted to log.
                     try:
                         start = self.recv_buffer.index( ':' ) + 1
                         end   = self.recv_buffer.index( '#', start )
-                        if self.queue_battery.empty() == False:
-                            d = self.queue_battery.get_nowait()
-                        self.queue_battery.put_nowait(self.recv_buffer[start:end])
+                        while self.queue_battery.empty() == False:
+                            self.queue_battery.get_nowait()
+                        self.queue_battery.put(self.recv_buffer[start:end])
                         #self.queue_battery.append(self.recv_buffer[start:end])
                     except ValueError:
                         if self.log: self.logger.info("Cannot parse battery information.")
