@@ -39,7 +39,7 @@ def robot_servo(servos_instance : Servos,
         if data is PROCESS_ACTION.KILL_THREAD:
             vision_queue.task_done()
             break
-        elif data is PROCESS_ACTION.LOST_OBJECT:
+        elif data is False:
             pass
         else :
             move_x = pidx.pid(cX, data[0], data[3])

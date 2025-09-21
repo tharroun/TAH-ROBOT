@@ -134,7 +134,7 @@ class Camera:
                 cx = int(M['m10']/M['m00'])
                 cy = int(M['m01']/M['m00'])
                 radius = int(numpy.sqrt(M['m00']/numpy.pi))
-                if circularity > 0.6 and circularity < 1.4:
+                if circularity > 0.7 and circularity < 1.3:
                     t2 = time.perf_counter() 
                     fps = numpy.round(1/(t2-t1),1)
                     t1 = t2
@@ -148,6 +148,9 @@ class Camera:
                     cv2.drawContours(frame,contours,0,(0,0,255),5)
                     if self.tracking_object:
                         self.tracking_queue.put((cx,cy,radius,fps))
+                else:
+                    if self.tracking_object:
+                        self.tracking_queue.put((False))
             #-------------------------------
             if self.battery_message:
                 if self.battery_queue.empty() == False :
