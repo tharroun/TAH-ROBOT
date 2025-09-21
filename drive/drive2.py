@@ -15,7 +15,7 @@ from gamepad2 import Gamepad
 
 # -----------------------------------
 async def event_loop(gamepad : Gamepad,
-                     servos  : Servos) -> bool:
+                     servos  : Servos):
     sx,sy=0,0
     async for event in gamepad.gamepad.async_read_loop() :
         if event.code == evdev.ecodes.BTN_MODE and event.value == 0:
@@ -36,7 +36,7 @@ async def event_loop(gamepad : Gamepad,
                 if gamepad.rotation_speed < 0   : gamepad.rotation_speed = 0
         
     print("Finished event_loop")
-    return True
+    return
 # -----------------------------------
 
 # -----------------------------------
@@ -53,7 +53,7 @@ def _update_servos(gamepad : Gamepad,
 
 # -----------------------------------
 async def drive_loop(gamepad : Gamepad,
-                     motors : Motors) -> bool:
+                     motors : Motors):
     omega = 0
     while gamepad.running :
         mx = gamepad.gamepad.absinfo(evdev.ecodes.ABS_X).value
@@ -73,54 +73,69 @@ async def drive_loop(gamepad : Gamepad,
         await asyncio.sleep(0.1)
     motors.stop()
     print("Finished drive_loop")
-    return True
+    return
 # -----------------------------------
 
 
 # -----------------------------------
-async def battery_loop(gamepad: Gamepad,
-                       motors : Motors) -> bool:
+async def battery_loop(gamepad       : Gamepad,
+                       motors        : Motors,
+                       battery_queue : type[multiprocessing.JoinableQueue]):
     while gamepad.running :
         volts = motors.get_battery()
         print(f"Motor voltage: {volts}")
+        battery_queue.put(volts) # type: ignore
         await asyncio.sleep(2.0)
     print("Finished battery_loop")
-    return True
+    return
 #-----------------------------------
 
 #-----------------------------------
-async def gamepad_main_loop(my_servos : Servos,
-                            my_motors : Motors,
-                            my_gamepad : Gamepad) :
+async def gamepad_main_loop(my_servos     : Servos,
+                            my_motors     : Motors,
+                            my_gamepad    : Gamepad,
+                            battery_queue : type[multiprocessing.JoinableQueue]):
     loop   = asyncio.get_running_loop()
     future = await asyncio.gather(event_loop(my_gamepad,my_servos),
                                   drive_loop(my_gamepad,my_motors),
-                                  battery_loop(my_gamepad,my_motors)) 
+                                  battery_loop(my_gamepad,my_motors,battery_queue))
     print("Finished gamepad_main_loop")
+    return
 #-----------------------------------
 
 #-----------------------------------
-def robot_control(my_servos : Servos,
-                  my_motors : Motors,
-                  my_gamepad : Gamepad) :
-    asyncio.run(gamepad_main_loop(my_servos,my_motors,my_gamepad))
+def robot_control(my_sermy_servos     : Servos,
+                            my_motors     : Motors,
+                            my_gamepad    : Gamepad,
+                            battery_queue : type[multiprocessing.JoinableQueue]) :
+    asyncio.run(gamepad_main_loop(my_servos,my_motors,my_gamepad,battery_queue))
     print("Finished robot_control")
     return
 #-----------------------------------
+
+# -------------------------------------------
+def robot_see(my_battery : type[multiprocessing.JoinableQueue]):
+    my_camera  = Camera(battery_queue = my_battery)
+    my_camera.view()
+    my_camera.deinit()
+    return
+# -------------------------------------------
+
 if __name__ == "__main__":
     
     my_servos  = Servos()
     my_motors  = Motors()
     my_gamepad = Gamepad()
-
-    #vision_process = multiprocessing.Process(target=robot_see, args=(my_battery,))
-    #vision_process.start()
+    my_battery = multiprocessing.JoinableQueue()
+    
+    vision_process = multiprocessing.Process(target=robot_see, args=(my_battery,))
+    vision_process.start()
 
     gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos,my_motors,my_gamepad,))
     gamepad_process.start()
-    #asyncio.run(gamepad_main_loop(my_servos,my_motors,my_gamepad))
 
     gamepad_process.join()
+    vision_process.terminate()
     my_servos.deinit()
     my_motors.deinit()
     my_gamepad.deinit()
