@@ -160,7 +160,7 @@ class Camera:
                         thickness = 2, 
                         lineType = cv2.LINE_8)            
             #-------------------------------
-            cv2.imshow("Camera", frame)
+            #cv2.imshow("Camera", frame)
             #-------------------------------
             if cv2.waitKey(1)==ord('q'):
                 break
