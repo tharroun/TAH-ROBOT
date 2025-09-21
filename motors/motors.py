@@ -8,7 +8,7 @@ import serial
 import threading
 import math
 import collections
-import queue
+import multiprocessing
 from   enum import Enum
 from   enum import IntEnum
 
@@ -61,7 +61,7 @@ class Motors:
             self.listening      = threading.Thread(target=self._listen_thread, daemon=False)
             self.listening.start()
             self.recv_buffer    = ""
-            self.queue_battery  = queue.Queue(maxsize=1)
+            self.queue_battery  = multiprocessing.Queue(maxsize=1)
             self.queue_battery.put('Unk')
             #self.queue_battery  = collections.deque(maxlen=1)
             #self.queue_battery.append('Unk')
