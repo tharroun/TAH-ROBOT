@@ -131,9 +131,19 @@ class Camera:
                 cy = int(M['m01']/M['m00'])
                 radius = int(numpy.sqrt(M['m00']/numpy.pi))
                 if radius > 10:
+                    t2 = time.perf_counter() 
+                    fps = numpy.round(1/(t2-t1),1)
+                    t1 = t2
+                    cv2.putText(frame, str(fps)+" FPS", 
+                                org = (40,70), 
+                                fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
+                                fontScale = 1, 
+                                color = (255, 0, 0), 
+                                thickness = 2, 
+                                lineType = cv2.LINE_8)
                     cv2.drawContours(frame,contours,0,(0,0,255),5)
                     if self.tracking_object:
-                        self.tracking_queue.put((t2-t1,cx,cy))
+                        self.tracking_queue.put((fps,cx,cy))
             #-------------------------------
             if self.battery_message:
                 if self.battery_queue.empty() == False :
@@ -144,18 +154,7 @@ class Camera:
                         fontScale = 1, 
                         color = (255, 0, 0), 
                         thickness = 2, 
-                        lineType = cv2.LINE_8)
-            #-------------------------------
-            t2 = time.perf_counter() 
-            fps = numpy.round(1/(t2-t1),1)
-            t1 = t2
-            cv2.putText(frame, str(fps)+" FPS", 
-                        org = (40,70), 
-                        fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
-                        fontScale = 1, 
-                        color = (255, 0, 0), 
-                        thickness = 2, 
-                        lineType = cv2.LINE_8)
+                        lineType = cv2.LINE_8)            
             #-------------------------------
             cv2.imshow("Camera", frame)
             #-------------------------------
