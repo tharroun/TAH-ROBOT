@@ -8,6 +8,7 @@ import serial
 import threading
 import math
 import collections
+import queue
 from   enum import Enum
 from   enum import IntEnum
 
@@ -60,9 +61,11 @@ class Motors:
             self.listening      = threading.Thread(target=self._listen_thread, daemon=False)
             self.listening.start()
             self.recv_buffer    = ""
-            self.queue_battery  = collections.deque(maxlen=1)
-            self.queue_battery.append('Unk')
-            print(id(self.queue_battery),self.queue_battery[0])
+            self.queue_battery  = queue.Queue(maxsize=1)
+            self.queue_battery.put('Unk')
+            #self.queue_battery  = collections.deque(maxlen=1)
+            #self.queue_battery.append('Unk')
+            #print(id(self.queue_battery),self.queue_battery[0])
             if self.log: self.logger.info("Started listening to serial port.")
 
         self.set_motor_type(1)
@@ -118,8 +121,11 @@ All other data is shunted to log.
                     try:
                         start = self.recv_buffer.index( ':' ) + 1
                         end   = self.recv_buffer.index( '#', start )
-                        self.queue_battery.append(self.recv_buffer[start:end])
-                        print(id(self.queue_battery),self.queue_battery[0])
+                        if self.queue_battery.full():
+                            d = self.queue_battery.get()
+                        self.queue_battery.put(self.recv_buffer[start:end])
+                        #self.queue_battery.append(self.recv_buffer[start:end])
+                        #print(id(self.queue_battery),self.queue_battery[0])
                     except ValueError:
                         if self.log: self.logger.info("Cannot parse battery information.")
                         self.queue_battery.append('Err')
@@ -194,8 +200,9 @@ All other data is shunted to log.
     def get_battery(self) -> str :
         self.send_data("$read_vol#")
         time.sleep(0.2)
-        print(id(self.queue_battery),self.queue_battery[0])
-        return self.queue_battery[0]
+        d = self.queue_battery.get()
+        print(d)
+        return d
 # -----------------------------------
 
 # -----------------------------------
