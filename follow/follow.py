@@ -50,7 +50,7 @@ def robot_servo(servos_instance : Servos,
                 #position_x = int(servo_x - control/4.0) 
                 new_x = sx
             servos_instance.servo0.angle = new_x
-            move_y = pidy.pid(cX, data[1], data[3])
+            move_y = pidy.pid(cY, data[1], data[3])
             new_y = int(sy + move_y)
             if new_y < 0 or new_y > 180: 
                 #position_x = int(servo_x - control/4.0) 
