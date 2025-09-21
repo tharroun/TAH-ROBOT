@@ -73,16 +73,17 @@ class Camera:
                         thickness = 2, 
                         lineType = cv2.LINE_8)
             #-------------------------------
-            t2 = time.perf_counter() 
-            fps = str(numpy.round(1/(t2-t1),2))+" FPS"
+            t2 = time.perf_counter()
+            fps = numpy.round(1/(t2-t1),2)
             t1 = t2
-            cv2.putText(frame, fps, 
-                        org = (40,60), 
+            cv2.putText(frame, str(fps)+" FPS", 
+                        org = (40,70), 
                         fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
                         fontScale = 1, 
                         color = (255, 0, 0), 
                         thickness = 2, 
                         lineType = cv2.LINE_8)
+            #-------------------------------
             cv2.imshow("Camera", frame)
             #-------------------------------
             if cv2.waitKey(1)==ord('q'):
@@ -117,7 +118,6 @@ class Camera:
             #-------------------------------
             contours,hierarchy = cv2.findContours(color_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
             if (contours):
-                t2 = time.perf_counter()
                 if (len(contours)>1) : 
                     contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
                 # ------------------------------------------------
@@ -134,13 +134,23 @@ class Camera:
                     cv2.drawContours(frame,contours,0,(0,0,255),5)
                     if self.tracking_object:
                         self.tracking_queue.put((t2-t1,cx,cy))
-                t1 = t2
             #-------------------------------
             if self.battery_message:
                 if self.battery_queue.empty() == False :
                     volts = self.battery_queue.get()
             cv2.putText(frame, volts, 
                         org = (40,40), 
+                        fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
+                        fontScale = 1, 
+                        color = (255, 0, 0), 
+                        thickness = 2, 
+                        lineType = cv2.LINE_8)
+            #-------------------------------
+            t2 = time.perf_counter() 
+            fps = numpy.round(1/(t2-t1),2)
+            t1 = t2
+            cv2.putText(frame, str(fps)+" FPS", 
+                        org = (40,70), 
                         fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
                         fontScale = 1, 
                         color = (255, 0, 0), 
