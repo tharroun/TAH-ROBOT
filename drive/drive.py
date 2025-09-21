@@ -3,7 +3,6 @@
 import sys
 import asyncio
 import multiprocessing
-import keyboard
 
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/servos')
@@ -39,8 +38,7 @@ async def drive_control() :
     future = await asyncio.gather(my_gamepad.event_loop(),
                                   my_gamepad.drive_loop(),
                                   my_gamepad.battery_loop())  
-    keyboard.send('q')
-    vision_process.join()
+    vision_process.terminate()
     my_servos.deinit()
     my_motors.deinit()
 # -------------------------------------------

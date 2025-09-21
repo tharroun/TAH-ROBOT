@@ -37,16 +37,16 @@ class Camera:
 
         cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
         cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
-
+        #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)e
+        
         self.battery_message = False
         if battery_queue != None:
-            self.battery_queue = battery_queue
+            self.battery_queue   = battery_queue
             self.battery_message = True
         
         self.tracking_object = False
         if tracking_queue != None:
-            self.tracking_queue = tracking_queue
+            self.tracking_queue  = tracking_queue
             self.tracking_object = True
         
         self.picam2.start()
@@ -120,6 +120,8 @@ class Camera:
                 radius = int(numpy.sqrt(M['m00']/numpy.pi))
                 if radius > 10:
                     cv2.drawContours(frame,contours,0,(0,0,255),5)
+                    if self.tracking_object:
+                        self.tracking_queue.put((t2-t1,cx,cy))
                 t1 = t2
             #-------------------------------
             if self.battery_message:

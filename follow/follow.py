@@ -4,6 +4,7 @@ import sys
 import asyncio
 import multiprocessing
 import enum 
+
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/servos')
 from servos  import Servos
@@ -40,7 +41,7 @@ def robot_see(battery_queue : type[multiprocessing.JoinableQueue],
     my_camera = Camera(battery_queue  = battery_queue,
                        tracking_queue = tracking_queue)
     my_camera.track()
-    #my_camera.deinit()
+    my_camera.deinit()
     return
 # -------------------------------------------
 
@@ -53,10 +54,10 @@ async def follow_control() :
                          motors_instance = my_motors,
                          battery_queue   = my_battery)
 
-    my_tracking = multiprocessing.JoinableQueue()
-    vision_process = multiprocessing.Process(target=robot_see, args=(my_battery, my_tracking,))
+    servo_queue = multiprocessing.JoinableQueue()
+    vision_process = multiprocessing.Process(target=robot_see, args=(my_battery, servo_queue,))
     vision_process.start()
-    servo_process = multiprocessing.Process(target=robot_servo, args=(my_servos, my_tracking,))
+    servo_process = multiprocessing.Process(target=robot_servo, args=(my_servos, servo_queue,))
     servo_process.start()
 
     gamepad_loop   = asyncio.get_running_loop()
@@ -65,11 +66,9 @@ async def follow_control() :
                                   my_gamepad.battery_loop())  
     
     vision_process.terminate()
-
-    my_tracking.put(PROCESS_ACTION.KILL_THREAD)
-    servo_process.terminate()
+    servo_queue.put(PROCESS_ACTION.KILL_THREAD)
+    servo_process.join()
     my_servos.deinit()
-    
     my_motors.deinit()
 # -------------------------------------------
 
