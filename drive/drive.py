@@ -11,7 +11,7 @@ from servos import Servos
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/motors')
 from motors import Motors
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/gamepad')
-from gamepad2 import Gamepad
+from gamepad import Gamepad
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/camera')
 from camera import Camera
 
