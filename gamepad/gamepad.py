@@ -158,7 +158,7 @@ class Gamepad:
         while self.control_motors :
             volts = self.motors.get_battery()
             if self.battery_message : 
-                self.battery_queue.put(volts)
+                self.battery_queue.put(volts) # type: ignore
             else :
                 print(f"Motor voltage: {volts}")
             await asyncio.sleep(2.0)

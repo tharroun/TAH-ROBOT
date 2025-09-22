@@ -65,33 +65,34 @@ class Gamepad:
     def deinit(self):
         self.running = False
         self.gamepad.close()
-        
 # -----------------------------------
 
+running = True
+
 # -----------------------------------
-async def event_loop(gamepad : Gamepad) -> bool:
-    sx,sy=0,0
-    async for event in gamepad.gamepad.async_read_loop() :
-        if event.code == evdev.ecodes.BTN_MODE and event.value == 0:
-            gamepad.running = False
+async def listen_00(dev):
+    global running
+    async for ev in dev.async_read_loop():
+        print("00:",evdev.categorize(ev),ev.value)
+        if ev.code == evdev.ecodes.BTN_MODE and ev.value == 0:
+            running = False
             break
 
-        if event.type ==  evdev.ecodes.EV_ABS :
-            if event.code == evdev.ecodes.ABS_RY : 
-                print("RY",event.value)
-            if event.code == evdev.ecodes.ABS_RX : 
-                print("RY",event.value)
-        
-    print("Finished event_loop")
-    return True
 # -----------------------------------
+async def listen_01(dev):
+    global running
+    while running:
+        r = dev.absinfo(evdev.ecodes.ABS_X).value
+        print("01:",r)
+        await asyncio.sleep(0.05)
 
 # -----------------------------------
 async def gamepad_control() :
     my_gamepad = Gamepad()
 
     loop   = asyncio.get_running_loop()
-    future = await asyncio.gather(event_loop(my_gamepad))  
+    future = await asyncio.gather(listen_00(my_gamepad),
+                                  listen_01(my_gamepad))  
 
     my_gamepad.deinit()
 # -----------------------------------
