@@ -70,19 +70,19 @@ class Gamepad:
 running = True
 
 # -----------------------------------
-async def listen_00(dev):
+async def listen_00(dev : Gamepad):
     global running
-    async for ev in dev.async_read_loop():
+    async for ev in dev.gamepad.async_read_loop():
         print("00:",evdev.categorize(ev),ev.value)
         if ev.code == evdev.ecodes.BTN_MODE and ev.value == 0:
             running = False
             break
 
 # -----------------------------------
-async def listen_01(dev):
+async def listen_01(dev : Gamepad):
     global running
     while running:
-        r = dev.absinfo(evdev.ecodes.ABS_X).value
+        r = dev.gamepad.absinfo(evdev.ecodes.ABS_X).value
         print("01:",r)
         await asyncio.sleep(0.05)
 
