@@ -209,8 +209,8 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
             break
         #-------------------------------
     cv2.destroyAllWindows()
-
     my_camera.deinit()
+    print("Finished robot_see")
     return
 
 # ------------------------------------------
@@ -250,6 +250,7 @@ def robot_servo(servos_instance : Servos,
             #print(new_x)
         #------
         vision_queue.task_done()
+    print("Finished robot_servo")
     return
 # -------------------------------------------
 
@@ -273,7 +274,6 @@ if __name__ == "__main__":
     gamepad_process.start()
 
     gamepad_process.join()
-    #vision_process.terminate()
     battery_queue.put(PROCESS_ACTION.KILL_THREAD)
     vision_process.join()
     servo_queue.put(PROCESS_ACTION.KILL_THREAD)
