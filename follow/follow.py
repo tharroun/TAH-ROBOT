@@ -189,7 +189,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
                             lineType = cv2.LINE_8)
                 cv2.drawContours(frame,contours,0,(0,0,255),5)
                 servo_queue.put((cx,cy,radius,dt))
-            else: servo_queue.put((PROCESS_ACTION.LOST_OBJECT))   
+            else: servo_queue.put(PROCESS_ACTION.LOST_OBJECT)   
         #-------------------------------
         if battery_queue.empty() == False : 
             volts = battery_queue.get() 
