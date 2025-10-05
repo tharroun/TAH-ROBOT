@@ -13,7 +13,7 @@ class Camera:
         log : bool = False,
         logfile: str = "PiCamMod3.conf"
     ):
-        Picamera2.set_logging(Picamera2.ERROR)
+        #Picamera2.set_logging(Picamera2.ERROR)
         self.picam2 = Picamera2()
 
         if log:
