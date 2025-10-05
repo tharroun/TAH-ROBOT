@@ -7,6 +7,7 @@ RESPONSE=$?
 if [ $RESPONSE -eq 0 ]; then
   clear
   echo "Running!"
+  source /home/tah/.bashrc
   source /home/tah/GitHub/TAH-ROBOT/.venv/bin/activate
   python3 /home/tah/GitHub/TAH-ROBOT/drive/drive.py
 else 
