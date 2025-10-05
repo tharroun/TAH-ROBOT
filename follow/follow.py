@@ -28,8 +28,8 @@ medium_kernel  = numpy.ones((6, 6), numpy.uint8)
 large_kernel   = numpy.ones((9, 9), numpy.uint8)
 
 class PROCESS_ACTION(enum.Enum):
-    KILL_THREAD = object() 
-    LOST_OBJECT = object()
+    KILL_THREAD = 1
+    LOST_OBJECT = 2
 
 # -----------------------------------
 async def event_loop(gamepad : Gamepad,
@@ -189,7 +189,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
                             lineType = cv2.LINE_8)
                 cv2.drawContours(frame,contours,0,(0,0,255),5)
                 servo_queue.put((cx,cy,radius,dt))
-            else: servo_queue.put(False)   
+            else: servo_queue.put(PROCESS_ACTION.LOST_OBJECT)   
         #-------------------------------
         if battery_queue.empty() == False : 
             volts = battery_queue.get() 
@@ -232,7 +232,7 @@ def robot_servo(servos_instance : Servos,
         if data is PROCESS_ACTION.KILL_THREAD:
             vision_queue.task_done()
             break
-        elif data is False:
+        elif data is PROCESS_ACTION.LOST_OBJECT:
             pass
         else :
             move_x = pidx.pid(cX, data[0], data[3])
