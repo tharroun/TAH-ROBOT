@@ -18,6 +18,10 @@ from gamepad import Gamepad
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/camera')
 from camera import Camera
 
+class PROCESS_ACTION(enum.Enum):
+    KILL_THREAD = 1
+    LOST_OBJECT = 2
+
 # -----------------------------------
 async def event_loop(gamepad : Gamepad,
                      servos  : Servos):
@@ -131,8 +135,10 @@ def robot_see(battery_queue : type[multiprocessing.JoinableQueue]):
         #frame = cv2.resize(im,(596,324),interpolation = cv2.INTER_CUBIC)
         frame = cv2.resize(im,(800,480),interpolation = cv2.INTER_CUBIC)
         #-------------------------------
-        if battery_queue.empty() == False : # type: ignore
-            volts = battery_queue.get() # type: ignore
+        if battery_queue.empty() == False :
+            volts = battery_queue.get() 
+            if volts is PROCESS_ACTION.KILL_THREAD: 
+                break
         cv2.putText(frame, volts, 
                     org = (40,40), 
                     fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
@@ -181,7 +187,9 @@ if __name__ == "__main__":
     gamepad_process.start()
 
     gamepad_process.join()
-    vision_process.terminate()
+    battery_queue.put(PROCESS_ACTION.KILL_THREAD)
+    vision_process.join()
+
     my_servos.deinit()
     my_motors.deinit()
     my_gamepad.deinit()
