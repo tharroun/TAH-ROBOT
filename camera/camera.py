@@ -2,7 +2,6 @@ import cv2
 import time
 import pprint
 from   picamera2 import Picamera2
-from   os.path import exists
 import numpy
 
 class Camera:
