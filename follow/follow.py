@@ -193,6 +193,8 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
         #-------------------------------
         if battery_queue.empty() == False : 
             volts = battery_queue.get() 
+            if volts is PROCESS_ACTION.KILL_THREAD: 
+                break
         cv2.putText(frame, volts, 
                     org = (40,40), 
                     fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
@@ -271,7 +273,9 @@ if __name__ == "__main__":
     gamepad_process.start()
 
     gamepad_process.join()
-    vision_process.terminate()
+    #vision_process.terminate()
+    battery_queue.put(PROCESS_ACTION.KILL_THREAD)
+    vision_process.join()
     servo_queue.put(PROCESS_ACTION.KILL_THREAD)
     servo_process.join()
 
