@@ -168,8 +168,8 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
             area = cv2.contourArea(contours[0])
             arclength = cv2.arcLength(contours[0],True)
             circularity = 4*numpy.pi*area/(arclength*arclength)
-                # NEXT TIME:https://docs.opencv.org/4.11.0/d4/d70/tutorial_hough_circle.html
-                # ------------------------------------------------
+            # NEXT TIME:https://docs.opencv.org/4.11.0/d4/d70/tutorial_hough_circle.html
+            # ------------------------------------------------
             M = cv2.moments(contours[0])
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
@@ -189,7 +189,17 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
                             lineType = cv2.LINE_8)
                 cv2.drawContours(frame,contours,0,(0,0,255),5)
                 servo_queue.put((cx,cy,radius,dt))
-            else: servo_queue.put((PROCESS_ACTION.LOST_OBJECT))           
+            else: servo_queue.put((PROCESS_ACTION.LOST_OBJECT))   
+        #-------------------------------
+        if battery_queue.empty() == False : 
+            volts = battery_queue.get() 
+        cv2.putText(frame, volts, 
+                    org = (40,40), 
+                    fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
+                    fontScale = 1, 
+                    color = (255, 0, 0), 
+                    thickness = 2, 
+                    lineType = cv2.LINE_8)        
         #-------------------------------
         cv2.imshow("Camera", frame)
         #-------------------------------
