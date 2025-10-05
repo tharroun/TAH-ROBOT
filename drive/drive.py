@@ -7,6 +7,7 @@ import multiprocessing
 import time
 import cv2
 import numpy
+import enum
 
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/servos')
