@@ -13,7 +13,7 @@ from motors import Motors
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/gamepad')
 from gamepad import Gamepad
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/camera')
-from camera import Camera
+from camera2 import Camera
 
 # -----------------------------------
 async def event_loop(gamepad : Gamepad,
@@ -115,24 +115,134 @@ def robot_control(my_servos     : Servos,
 #-----------------------------------
 
 # -------------------------------------------
-def robot_see(my_battery : type[multiprocessing.JoinableQueue]):
-    my_camera  = Camera(battery_queue = my_battery)
-    my_camera.view()
+def robot_see(battery_queue : type[multiprocessing.JoinableQueue]):
+    
+    my_camera = Camera()
+
+    # ------------------------------------------
+    volts = "0.0 V"
+    fps   = "0.0 FPS"
+    t1    = time.perf_counter() 
+    while True:
+        im  = my_camera.picam2.capture_array()
+        #frame = cv2.resize(im,(596,324),interpolation = cv2.INTER_CUBIC)
+        frame = cv2.resize(im,(800,480),interpolation = cv2.INTER_CUBIC)
+        #-------------------------------
+        if battery_queue.empty() == False : # type: ignore
+            volts = battery_queue.get() # type: ignore
+        else : volts = "0.0 V"
+        cv2.putText(frame, volts, 
+                    org = (40,40), 
+                    fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
+                    fontScale = 1, 
+                    color = (255, 0, 0), 
+                    thickness = 2, 
+                    lineType = cv2.LINE_8)
+        #-------------------------------
+        t2 = time.perf_counter()
+        fps = numpy.round(1/(t2-t1),1)
+        t1 = t2
+        cv2.putText(frame, str(fps)+" FPS", 
+                    org = (40,70), 
+                    fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
+                    fontScale = 1, 
+                    color = (255, 0, 0), 
+                    thickness = 2, 
+                    lineType = cv2.LINE_8)
+        #-------------------------------
+        cv2.imshow("Camera", frame)
+        #-------------------------------
+        if cv2.waitKey(1)==ord('q'):
+            break
+        #-------------------------------
+    cv2.destroyAllWindows()
+# ------------------------------------------
+
     my_camera.deinit()
     return
 # -------------------------------------------
+
+
+# ------------------------------------------
+def robot_track(my_camera      : Camera,
+                battery_queue  : type[multiprocessing.JoinableQueue],
+                tracking_queue : type[multiprocessing.JoinableQueue]):
+
+    # ------
+    calbiration_filename = '/home/tah/GitHub/TAH-ROBOT/color_correction/calibration.yaml' 
+    if exists(calbiration_filename) == False:
+        raise FileNotFoundError("calibration.yaml does nto exist.")
+    with open(calbiration_filename,'r') as file:
+        color_range = yaml.safe_load(file)
+    COLOR_MIN = numpy.array(color_range['hsv']['min'],numpy.uint8)
+    COLOR_MAX = numpy.array(color_range['hsv']['max'],numpy.uint8)
+    # ------
+
+    tracking_queue.put((800,480))
+
+    t1 = time.perf_counter() 
+    volts = "0.0 V"
+    while True:
+        im  = my_camera.picam2.capture_array()
+        #frame = cv2.resize(im,(596,324),interpolation = cv2.INTER_CUBIC)
+        frame = cv2.resize(im,(800,480),interpolation = cv2.INTER_CUBIC)
+        #-------------------------------
+        frame_hsv  = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
+        color_mask = cv2.inRange(frame_hsv, COLOR_MIN, COLOR_MAX)
+        color_mask = cv2.morphologyEx(color_mask, cv2.MORPH_CLOSE, small_kernel, iterations = 1)
+        color_mask = cv2.morphologyEx(color_mask, cv2.MORPH_OPEN,  small_kernel, iterations = 1)
+        #-------------------------------
+        contours,hierarchy = cv2.findContours(color_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        if (contours):
+            if (len(contours)>1) : 
+                contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
+                # ------------------------------------------------
+            area = cv2.contourArea(contours[0])
+            arclength = cv2.arcLength(contours[0],True)
+            circularity = 4*numpy.pi*area/(arclength*arclength)
+                # NEXT TIME:https://docs.opencv.org/4.11.0/d4/d70/tutorial_hough_circle.html
+                # ------------------------------------------------
+            M = cv2.moments(contours[0])
+            cx = int(M['m10']/M['m00'])
+            cy = int(M['m01']/M['m00'])
+            radius = int(numpy.sqrt(M['m00']/numpy.pi))
+            #if circularity > 0.6 and circularity < 1.4:
+            if radius > 10:
+                t2 = time.perf_counter() 
+                dt = t2-t1
+                fps = numpy.round(1/dt,1)
+                t1 = t2
+                cv2.putText(frame, str(fps)+" FPS", 
+                            org = (40,70), 
+                            fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
+                            fontScale = 1, 
+                            color = (255, 0, 0), 
+                            thickness = 2, 
+                            lineType = cv2.LINE_8)
+                cv2.drawContours(frame,contours,0,(0,0,255),5)
+                tracking_queue.put((cx,cy,radius,dt))
+            else: tracking_queue.put((False))           
+        #-------------------------------
+        cv2.imshow("Camera", frame)
+        #-------------------------------
+        if cv2.waitKey(1)==ord('q'):
+            break
+            #-------------------------------
+    cv2.destroyAllWindows()
+# ------------------------------------------
 
 if __name__ == "__main__":
     
     my_servos  = Servos()
     my_motors  = Motors()
     my_gamepad = Gamepad()
-    my_battery = multiprocessing.JoinableQueue()
+
+    battery_queue = multiprocessing.JoinableQueue()
     
-    vision_process = multiprocessing.Process(target=robot_see, args=(my_battery,))
+    vision_process = multiprocessing.Process(target=robot_see, args=(battery_queue,))
     vision_process.start()
 
-    gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos,my_motors,my_gamepad,my_battery))
+    gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos,my_motors,my_gamepad,battery_queue))
     gamepad_process.start()
 
     gamepad_process.join()
