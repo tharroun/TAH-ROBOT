@@ -1,10 +1,14 @@
-#!/usr/bin/env python3
 #coding=utf8
 import evdev
 import math
 import sys
 import asyncio
 import multiprocessing
+import time
+import cv2
+import numpy
+import yaml
+
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/servos')
 from servos import Servos
@@ -14,6 +18,11 @@ sys.path.append('/home/tah/GitHub/TAH-ROBOT/gamepad')
 from gamepad import Gamepad
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/camera')
 from camera2 import Camera
+
+
+small_kernel   = numpy.ones((3, 3), numpy.uint8)
+medium_kernel  = numpy.ones((6, 6), numpy.uint8)
+large_kernel   = numpy.ones((9, 9), numpy.uint8)
 
 # -----------------------------------
 async def event_loop(gamepad : Gamepad,
@@ -130,7 +139,6 @@ def robot_see(battery_queue : type[multiprocessing.JoinableQueue]):
         #-------------------------------
         if battery_queue.empty() == False : # type: ignore
             volts = battery_queue.get() # type: ignore
-        else : volts = "0.0 V"
         cv2.putText(frame, volts, 
                     org = (40,40), 
                     fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
@@ -139,9 +147,9 @@ def robot_see(battery_queue : type[multiprocessing.JoinableQueue]):
                     thickness = 2, 
                     lineType = cv2.LINE_8)
         #-------------------------------
-        t2 = time.perf_counter()
+        t2  = time.perf_counter()
         fps = numpy.round(1/(t2-t1),1)
-        t1 = t2
+        t1  = t2
         cv2.putText(frame, str(fps)+" FPS", 
                     org = (40,70), 
                     fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
@@ -156,7 +164,7 @@ def robot_see(battery_queue : type[multiprocessing.JoinableQueue]):
             break
         #-------------------------------
     cv2.destroyAllWindows()
-# ------------------------------------------
+    # ------------------------------------------
 
     my_camera.deinit()
     return
