@@ -189,7 +189,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
                             lineType = cv2.LINE_8)
                 cv2.drawContours(frame,contours,0,(0,0,255),5)
                 servo_queue.put((cx,cy,radius,dt))
-            else: servo_queue.put(PROCESS_ACTION.LOST_OBJECT)   
+            else: servo_queue.put(False)   
         #-------------------------------
         if battery_queue.empty() == False : 
             volts = battery_queue.get() 
@@ -205,7 +205,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
         #-------------------------------
         if cv2.waitKey(1)==ord('q'):
             break
-            #-------------------------------
+        #-------------------------------
     cv2.destroyAllWindows()
 
     my_camera.deinit()
@@ -232,7 +232,7 @@ def robot_servo(servos_instance : Servos,
         if data is PROCESS_ACTION.KILL_THREAD:
             vision_queue.task_done()
             break
-        elif data is PROCESS_ACTION.LOST_OBJECT:
+        elif data is False:
             pass
         else :
             move_x = pidx.pid(cX, data[0], data[3])
