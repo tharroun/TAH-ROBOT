@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 function StartDialog () {
 dialog --yesno "Is the gamepad and robot ready?" 10 31
 }
