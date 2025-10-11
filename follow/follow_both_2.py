@@ -222,7 +222,7 @@ def robot_move(servos_instance : Servos,
                vision_queue : type[multiprocessing.JoinableQueue]):
     
     pidz = MyPID(40.0,0,0)
-    pido = MyPID(8.0,0,0)
+    pido = MyPID(5.0,0,0)
     pidx = MyPID(0.025,0.0001,0.001)
     pidy = MyPID(0.025,0.0001,0.001)
 
@@ -244,13 +244,11 @@ def robot_move(servos_instance : Servos,
             pass
         else :
             move_x = pidx.pid(cX, data[0], data[3])
-            new_x = numpy.clip(servos_instance.servo0.angle + move_x,
-                               1.0,179.0)
+            new_x = numpy.clip(servos_instance.servo0.angle + move_x, 1.0,179.0)
             servos_instance.servo0.angle = int(new_x)
             #---
             move_y = pidy.pid(cY, data[1], data[3])
-            new_y = numpy.clip(servos_instance.servo1.angle - move_y,
-                                   1.0,179.0)
+            new_y = numpy.clip(servos_instance.servo1.angle - move_y, 1.0,179.0)
             servos_instance.servo1.angle = int(new_y)
             #---
             if (i==5) :
@@ -261,10 +259,10 @@ def robot_move(servos_instance : Servos,
                 #---
                 # object left and looking left 
                 if new_x < 30 and servos_instance.servo0.angle < 45 :
-                    omega = -pido.pid(cX,data[0],data[3])
+                    omega = -pido.pid(cX, data[0], data[3])
                 # object right and looking right 
                 if new_x > 150 and servos_instance.servo0.angle > 135 : 
-                    omega = -pido.pid(cX,data[0],data[3])
+                    omega = -pido.pid(cX, data[0], data[3])
                 motors_instance.go(move_z,0.0,omega)
                 i=0
             else : i+=1
