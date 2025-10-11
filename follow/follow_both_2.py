@@ -221,11 +221,10 @@ def robot_move(servos_instance : Servos,
                motors_instance : Motors,
                vision_queue : type[multiprocessing.JoinableQueue]):
     
-    pidx = MyPID(0.007,0.0001,0.001)
-    pidy = MyPID(0.011,0.0001,0.002)
-
-    pidr = MyPID(1.0,0.0,0.0)
-    pidz = MyPID(1.0,0.0,0.0)
+    pidz = MyPID(40.0,0,0)
+    pido = MyPID(8.0,0,0)
+    pidx = MyPID(0.025,0.0001,0.001)
+    pidy = MyPID(0.025,0.0001,0.001)
 
     (width,height) = vision_queue.get()
     vision_queue.task_done()
@@ -235,6 +234,7 @@ def robot_move(servos_instance : Servos,
     lX = width/8.0
     rX = 7.0*width/8.0
     
+    i = 0
     while True:
         data = vision_queue.get()
         if data is PROCESS_ACTION.KILL_THREAD:
@@ -245,30 +245,30 @@ def robot_move(servos_instance : Servos,
             motors_instance.stop()
             pass
         else :
-            omega = 0
-            #---
             move_x = pidx.pid(cX, data[0], data[3])
             new_x = int(servos_instance.servo0.angle + move_x)
             if new_x >= 0 and new_x <= 180: 
                 servos_instance.servo0.angle = int(new_x)
-            #---
-            # object left and looking left 
-            if data[0] < lX:
-            #if new_x < 5 and servos_instance.servo0.angle < 15 : 
-                omega = -150.0
-                #omega = -numpy.fabs(pidr.pid(lX,data[0],data[3]))
-            # object right and looking right 
-            if data[0] > rX:
-            #if new_x > 175 and servos_instance.servo0.angle > 165 : 
-                omega = +150.0
-                #omega = numpy.fabs(pidr.pid(rX,data[0],data[3]))
-            motors_instance.go(0,0,omega)
             #---
             move_y = pidy.pid(cY, data[1], data[3])
             new_y = int(servos_instance.servo1.angle - move_y)
             if new_y >= 0 and new_y <= 180: 
                 servos_instance.servo1.angle = int(new_y)
             #---
+            if (i==4) :
+                # object left and looking left 
+                if data[0] < lX:
+                #if new_x < 5 and servos_instance.servo0.angle < 15 : 
+                    omega = -pido.pid(lX,data[0],data[3])
+                # object right and looking right 
+                if data[0] > rX:
+                #if new_x > 175 and servos_instance.servo0.angle > 165 : 
+                    omega = -pidr.pid(rX,data[0],data[3])
+                motors_instance.go(0,0,omega)
+                i=0
+            else : i+=1
+            #---
+            
         #------
         vision_queue.task_done()
     print("Finished robot_move")

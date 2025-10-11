@@ -252,6 +252,7 @@ def robot_move(servos_instance : Servos,
             new_y = int(servos_instance.servo1.angle - move_y)
             if new_y >= 0 and new_y <= 180: 
                 servos_instance.servo1.angle = int(new_y)
+            #---
             if (i==5) :
                 #---
                 omega = -pido.pid(cX, data[0], data[3])
@@ -262,6 +263,7 @@ def robot_move(servos_instance : Servos,
                 motors_instance.go(move_z,0.0,omega)
                 i=0
             else : i+=1
+            #---
         #------
         vision_queue.task_done()
     print("Finished robot_move")
