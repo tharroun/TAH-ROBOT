@@ -22,14 +22,12 @@ pip3 install evdev
 
 ### Programming
 - Drive
-    - Need to add text messages to the 
-    - Add a button and label to monitor wheel speeds
-    - Include a PID control adjustment tool
+    - add pid control to the motors
+    - tune pid for the servos
 - Motors
-    - What is the deadtime for the 520 motor?
-    - Test using the YB speed control
-    - Failing that, make my own speed control tuner using PWM
+    - what is the deadtime for the 520 motor?
+    - calibrate the speed using the encoders
 - Servos
-    - How to find the max/min of the servo?
-    - How to re-center the servos?
+    - how to find the max/min of the servo?
+    - how to re-center the servos?
 
