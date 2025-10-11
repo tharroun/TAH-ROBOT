@@ -253,7 +253,7 @@ def robot_move(servos_instance : Servos,
             else : i+=1
         #------
         vision_queue.task_done()
-    print("Finished robot_servo")
+    print("Finished robot_move")
     return
 # -------------------------------------------
 
@@ -277,10 +277,10 @@ if __name__ == "__main__":
     gamepad_process.start()
 
     gamepad_process.join()
-    battery_queue.put(PROCESS_ACTION.KILL_THREAD)
-    vision_process.join()
     tracking_queue.put(PROCESS_ACTION.KILL_THREAD)
+    battery_queue.put(PROCESS_ACTION.KILL_THREAD)
     move_process.join()
+    vision_process.join()
 
     my_servos.deinit()
     my_motors.deinit()
