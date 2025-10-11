@@ -256,6 +256,7 @@ def robot_move(servos_instance : Servos,
                 servos_instance.servo1.angle = int(new_y)
             #---
             if (i==4) :
+                omega = 0
                 # object left and looking left 
                 if data[0] < lX:
                 #if new_x < 5 and servos_instance.servo0.angle < 15 : 
