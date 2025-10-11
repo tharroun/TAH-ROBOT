@@ -221,8 +221,8 @@ def robot_move(servos_instance : Servos,
                motors_instance : Motors,
                vision_queue : type[multiprocessing.JoinableQueue]):
     
-    pidz = MyPID(32.0,0.5,1.0)
-    pido = MyPID(6.0,0.1,0.5)
+    pidz = MyPID(20.0,0,1.0)
+    pido = MyPID(3.0,0,0.5)
     pidx = MyPID(0.007,0.0001,0.001)
     pidy = MyPID(0.011,0.0001,0.002)
 
@@ -272,7 +272,10 @@ def robot_move(servos_instance : Servos,
 if __name__ == "__main__":
     
     my_servos  = Servos()
+    my_servos.servo0.angle = 90
+    my_servos.servo1.angle = 90
     my_motors  = Motors()
+    my_motors.stop()
     my_gamepad = Gamepad()
 
     battery_queue  = multiprocessing.JoinableQueue()
