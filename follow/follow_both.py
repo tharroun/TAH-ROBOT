@@ -221,10 +221,10 @@ def robot_move(servos_instance : Servos,
                motors_instance : Motors,
                vision_queue : type[multiprocessing.JoinableQueue]):
     
-    pidz = MyPID(20.0,0,1.0)
-    pido = MyPID(3.0,0,0.5)
-    pidx = MyPID(0.007,0.0001,0.001)
-    pidy = MyPID(0.011,0.0001,0.002)
+    pidz = MyPID(16.0,0,0)
+    pido = MyPID(3.0,0,0)
+    pidx = MyPID(0.025,0.0001,0.001)
+    pidy = MyPID(0.025,0.0001,0.001)
 
     (width,height) = vision_queue.get()
     vision_queue.task_done()
@@ -281,20 +281,20 @@ if __name__ == "__main__":
     battery_queue  = multiprocessing.JoinableQueue()
     tracking_queue = multiprocessing.JoinableQueue()
     
-    vision_process = multiprocessing.Process(target=robot_see, args=(battery_queue, tracking_queue))
-    vision_process.start()
+    gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos, my_motors, my_gamepad, battery_queue))
+    gamepad_process.start()
 
     move_process = multiprocessing.Process(target=robot_move, args=(my_servos, my_motors, tracking_queue))
     move_process.start()
 
-    gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos, my_motors, my_gamepad, battery_queue))
-    gamepad_process.start()
-
-    gamepad_process.join()
-    tracking_queue.put(PROCESS_ACTION.KILL_THREAD)
+    vision_process = multiprocessing.Process(target=robot_see, args=(battery_queue, tracking_queue))
+    vision_process.start()
+    
     battery_queue.put(PROCESS_ACTION.KILL_THREAD)
-    move_process.join()
+    tracking_queue.put(PROCESS_ACTION.KILL_THREAD)
     vision_process.join()
+    move_process.join()
+    gamepad_process.join()
 
     my_servos.deinit()
     my_motors.deinit()

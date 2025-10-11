@@ -217,11 +217,12 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
 
 
 # -------------------------------------------
-def robot_servo(servos_instance : Servos,
-                vision_queue : type[multiprocessing.JoinableQueue]):
+def robot_move(servos_instance : Servos,
+               motors_instance : Motors,
+               vision_queue : type[multiprocessing.JoinableQueue]):
     
-    pidx = MyPID(0.007,0.0001,0.001)
-    pidy = MyPID(0.011,0.0001,0.002)
+    pidx = MyPID(0.015,0.0001,0.001)
+    pidy = MyPID(0.015,0.0001,0.001)
 
     (width,height) = vision_queue.get()
     vision_queue.task_done()
@@ -232,11 +233,14 @@ def robot_servo(servos_instance : Servos,
     while True:
         data = vision_queue.get()
         if data is PROCESS_ACTION.KILL_THREAD:
+            motors_instance.stop()
             vision_queue.task_done()
             break
         elif data is PROCESS_ACTION.LOST_OBJECT:
+            motors_instance.stop()
             pass
         else :
+            #---
             move_x = pidx.pid(cX, data[0], data[3])
             new_x = int(servos_instance.servo0.angle + move_x)
             if new_x >= 0 and new_x <= 180: 
@@ -247,10 +251,9 @@ def robot_servo(servos_instance : Servos,
             if new_y >= 0 and new_y <= 180: 
                 servos_instance.servo1.angle = int(new_y)
             #---
-            #print(new_x)
         #------
         vision_queue.task_done()
-    print("Finished robot_servo")
+    print("Finished robot_move")
     return
 # -------------------------------------------
 
@@ -261,14 +264,14 @@ if __name__ == "__main__":
     my_motors  = Motors()
     my_gamepad = Gamepad()
 
-    battery_queue = multiprocessing.JoinableQueue()
-    servo_queue   = multiprocessing.JoinableQueue()
+    battery_queue  = multiprocessing.JoinableQueue()
+    tracking_queue = multiprocessing.JoinableQueue()
     
-    vision_process = multiprocessing.Process(target=robot_see, args=(battery_queue, servo_queue))
+    vision_process = multiprocessing.Process(target=robot_see, args=(battery_queue, tracking_queue))
     vision_process.start()
 
-    servo_process = multiprocessing.Process(target=robot_servo, args=(my_servos, servo_queue))
-    servo_process.start()
+    move_process = multiprocessing.Process(target=robot_move, args=(my_servos, my_motors, tracking_queue))
+    move_process.start()
 
     gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos, my_motors, my_gamepad, battery_queue))
     gamepad_process.start()
@@ -276,8 +279,8 @@ if __name__ == "__main__":
     gamepad_process.join()
     battery_queue.put(PROCESS_ACTION.KILL_THREAD)
     vision_process.join()
-    servo_queue.put(PROCESS_ACTION.KILL_THREAD)
-    servo_process.join()
+    tracking_queue.put(PROCESS_ACTION.KILL_THREAD)
+    move_process.join()
 
     my_servos.deinit()
     my_motors.deinit()
