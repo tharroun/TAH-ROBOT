@@ -290,11 +290,11 @@ if __name__ == "__main__":
     move_process = multiprocessing.Process(target=robot_move, args=(my_servos, my_motors, tracking_queue))
     move_process.start()
 
+    gamepad_process.join()
     battery_queue.put(PROCESS_ACTION.KILL_THREAD)
     tracking_queue.put(PROCESS_ACTION.KILL_THREAD)
     vision_process.join()
     move_process.join()
-    gamepad_process.join()
 
     my_servos.deinit()
     my_motors.deinit()

@@ -132,7 +132,7 @@ def robot_control(my_servos     : Servos,
 
 # ------------------------------------------
 def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
-              servo_queue : type[multiprocessing.JoinableQueue]):
+              tracking_queue : type[multiprocessing.JoinableQueue]):
 
     # ------
     calbiration_filename = '/home/tah/GitHub/TAH-ROBOT/color_correction/calibration.yaml' 
@@ -146,7 +146,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
 
     my_camera = Camera()
 
-    servo_queue.put((800,480))
+    tracking_queue.put((800,480))
 
     t1 = time.perf_counter() 
     volts = "0.0 V"
@@ -188,8 +188,8 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
                             thickness = 2, 
                             lineType = cv2.LINE_8)
                 cv2.drawContours(frame,contours,0,(0,0,255),5)
-                servo_queue.put((cx,cy,radius,dt))
-            else: servo_queue.put(PROCESS_ACTION.LOST_OBJECT)   
+                tracking_queue.put((cx,cy,radius,dt))
+            else: tracking_queue.put(PROCESS_ACTION.LOST_OBJECT)   
         #-------------------------------
         if battery_queue.empty() == False : 
             volts = battery_queue.get() 
@@ -270,20 +270,20 @@ if __name__ == "__main__":
     battery_queue  = multiprocessing.JoinableQueue()
     tracking_queue = multiprocessing.JoinableQueue()
     
-    vision_process = multiprocessing.Process(target=robot_see, args=(battery_queue, tracking_queue))
-    vision_process.start()
-
     gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos, my_motors, my_gamepad, battery_queue))
     gamepad_process.start()
+
+    vision_process = multiprocessing.Process(target=robot_see, args=(battery_queue, tracking_queue))
+    vision_process.start()
 
     move_process = multiprocessing.Process(target=robot_move, args=(my_servos, my_motors, tracking_queue))
     move_process.start()
 
+    gamepad_process.join()
     battery_queue.put(PROCESS_ACTION.KILL_THREAD)
     tracking_queue.put(PROCESS_ACTION.KILL_THREAD)
     vision_process.join()
     move_process.join()
-    gamepad_process.join()
 
     my_servos.deinit()
     my_motors.deinit()
