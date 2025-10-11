@@ -132,7 +132,7 @@ def robot_control(my_servos     : Servos,
 
 # ------------------------------------------
 def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
-              servo_queue : type[multiprocessing.JoinableQueue]):
+              tracking_queue : type[multiprocessing.JoinableQueue]):
 
     # ------
     calbiration_filename = '/home/tah/GitHub/TAH-ROBOT/color_correction/calibration.yaml' 
@@ -146,7 +146,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
 
     my_camera = Camera()
 
-    servo_queue.put((800,480))
+    tracking_queue.put((800,480))
 
     t1 = time.perf_counter() 
     volts = "0.0 V"
@@ -188,8 +188,8 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
                             thickness = 2, 
                             lineType = cv2.LINE_8)
                 cv2.drawContours(frame,contours,0,(0,0,255),5)
-                servo_queue.put((cx,cy,radius,dt))
-            else: servo_queue.put(PROCESS_ACTION.LOST_OBJECT)   
+                tracking_queue.put((cx,cy,radius,dt))
+            else: tracking_queue.put(PROCESS_ACTION.LOST_OBJECT)   
         #-------------------------------
         if battery_queue.empty() == False : 
             volts = battery_queue.get() 
@@ -244,29 +244,31 @@ def robot_move(servos_instance : Servos,
             pass
         else :
             move_x = pidx.pid(cX, data[0], data[3])
-            new_x = int(numpy.clip(servos_instance.servo0.angle + move_x,
-                               0.0,180.0))
+            new_x = numpy.clip(servos_instance.servo0.angle + move_x,
+                               1.0,179.0)
             servos_instance.servo0.angle = int(new_x)
             #---
             move_y = pidy.pid(cY, data[1], data[3])
-            new_y = int(numpy.clip(servos_instance.servo1.angle - move_y,
-                                   0.0,180.0))
+            new_y = numpy.clip(servos_instance.servo1.angle - move_y,
+                                   1.0,179.0)
             servos_instance.servo1.angle = int(new_y)
             #---
-            if (i==4) :
+            if (i==5) :
+                #---
                 omega = 0
+                #---
                 move_z = pidz.pid(40, data[2], data[3])
+                #---
                 # object left and looking left 
                 if new_x < 30 and servos_instance.servo0.angle < 45 :
                     omega = -pido.pid(cX,data[0],data[3])
                 # object right and looking right 
                 if new_x > 150 and servos_instance.servo0.angle > 135 : 
                     omega = -pido.pid(cX,data[0],data[3])
-                motors_instance.go(move_z,0,omega)
+                motors_instance.go(move_z,0.0,omega)
                 i=0
             else : i+=1
             #---
-            
         #------
         vision_queue.task_done()
     print("Finished robot_move")
@@ -300,7 +302,7 @@ if __name__ == "__main__":
     tracking_queue.put(PROCESS_ACTION.KILL_THREAD)
     vision_process.join()
     move_process.join()
-    
+
     my_servos.deinit()
     my_motors.deinit()
     my_gamepad.deinit()
