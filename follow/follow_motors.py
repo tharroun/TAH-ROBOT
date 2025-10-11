@@ -230,6 +230,7 @@ def robot_move(servos_instance : Servos,
     cX = width/2.0
     cY = height/2.0
     
+    i = 0
     while True:
         data = vision_queue.get()
         if data is PROCESS_ACTION.KILL_THREAD:
@@ -240,13 +241,16 @@ def robot_move(servos_instance : Servos,
             motors_instance.stop()
             pass
         else :
-            #---
-            omega = pido.pid(cX, data[0], data[3])
-            #---
-            move_z = pidz.pid(15,data[2],data[3])
-            #---
-            print(move_z,omega)
-            motors_instance.go(move_z,0.0,omega)
+            if (i==4) :
+                #---
+                omega = pido.pid(cX, data[0], data[3])
+                #---
+                move_z = pidz.pid(15,data[2],data[3])
+                #---
+                print(move_z,omega)
+                motors_instance.go(move_z,0.0,omega)
+                i=0
+            else : i+=1
         #------
         vision_queue.task_done()
     print("Finished robot_servo")
