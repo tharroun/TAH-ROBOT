@@ -221,8 +221,8 @@ def robot_move(servos_instance : Servos,
                motors_instance : Motors,
                vision_queue : type[multiprocessing.JoinableQueue]):
     
-    pidz = MyPID(25.0,0.0,1.0)
-    pido = MyPID(5.0,0.0,0.0)
+    pidz = MyPID(32.0,0.0,1.0)
+    pido = MyPID(6.0,0.0,0.0)
 
     (width,height) = vision_queue.get()
     vision_queue.task_done()
@@ -243,7 +243,7 @@ def robot_move(servos_instance : Servos,
         else :
             if (i==5) :
                 #---
-                omega = pido.pid(cX, data[0], data[3])
+                omega = -pido.pid(cX, data[0], data[3])
                 #---
                 move_z = pidz.pid(40, data[2], data[3])
                 #---
