@@ -264,7 +264,7 @@ def robot_move(servos_instance : Servos,
                 # object right and looking right 
                 if data[0] > rX:
                 #if new_x > 175 and servos_instance.servo0.angle > 165 : 
-                    omega = -pidr.pid(rX,data[0],data[3])
+                    omega = -pido.pid(rX,data[0],data[3])
                 motors_instance.go(0,0,omega)
                 i=0
             else : i+=1
