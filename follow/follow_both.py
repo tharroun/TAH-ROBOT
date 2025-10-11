@@ -251,7 +251,7 @@ def robot_move(servos_instance : Servos,
             new_y = numpy.clip(servos_instance.servo1.angle - move_y, 1.0,179.0)
             servos_instance.servo1.angle = int(new_y)
             #---
-            if (i==3) :
+            if (i==2) :
                 #---
                 omega = -pido.pid(cX, data[0], data[3])
                 #---

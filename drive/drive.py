@@ -176,7 +176,10 @@ def robot_see(battery_queue : type[multiprocessing.JoinableQueue]):
 if __name__ == "__main__":
     
     my_servos  = Servos()
+    my_servos.servo0.angle = 90
+    my_servos.servo1.angle = 90
     my_motors  = Motors()
+    my_motors.stop()
     my_gamepad = Gamepad()
 
     battery_queue = multiprocessing.JoinableQueue()
@@ -191,6 +194,8 @@ if __name__ == "__main__":
     battery_queue.put(PROCESS_ACTION.KILL_THREAD)
     vision_process.join()
 
+    my_servos.servo0.angle = 90
+    my_servos.servo1.angle = 90
     my_servos.deinit()
     my_motors.deinit()
     my_gamepad.deinit()
