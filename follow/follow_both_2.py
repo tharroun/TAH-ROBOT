@@ -222,7 +222,7 @@ def robot_move(servos_instance : Servos,
                vision_queue : type[multiprocessing.JoinableQueue]):
     
     pidz = MyPID(60.0,0,0)
-    pido = MyPID(5.0,0,0)
+    pido = MyPID(8.0,0,0)
     pidx = MyPID(0.025,0.0001,0.001)
     pidy = MyPID(0.025,0.0001,0.001)
 
@@ -254,17 +254,17 @@ def robot_move(servos_instance : Servos,
             if (i==3) :
                 #---
                 omega = 0
-                #---
-                move_z = pidz.pid(40, data[2], data[3])
-                #---
                 # object left and looking left 
                 if new_x < 30 and servos_instance.servo0.angle < 45 :
                     omega = -pido.pid(cX, data[0], data[3])
                 # object right and looking right 
                 if new_x > 150 and servos_instance.servo0.angle > 135 : 
                     omega = -pido.pid(cX, data[0], data[3])
+                #---
+                move_z = pidz.pid(40, data[2], data[3])
+                #---
                 motors_instance.go(move_z,0.0,omega)
-                i=0
+                i = 0
             else : i+=1
             #---
         #------
@@ -301,6 +301,8 @@ if __name__ == "__main__":
     vision_process.join()
     move_process.join()
 
+    my_servos.servo0.angle = 90
+    my_servos.servo1.angle = 90
     my_servos.deinit()
     my_motors.deinit()
     my_gamepad.deinit()
