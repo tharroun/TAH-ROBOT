@@ -244,21 +244,20 @@ def robot_move(servos_instance : Servos,
             pass
         else :
             move_x = pidx.pid(cX, data[0], data[3])
-            new_x = int(servos_instance.servo0.angle + move_x)
-            if new_x >= 0 and new_x <= 180: 
-                servos_instance.servo0.angle = int(new_x)
+            new_x = int(numpy.clip(servos_instance.servo0.angle + move_x,
+                               0.0,180.0))
+            servos_instance.servo0.angle = int(new_x)
             #---
             move_y = pidy.pid(cY, data[1], data[3])
-            new_y = int(servos_instance.servo1.angle - move_y)
-            if new_y >= 0 and new_y <= 180: 
-                servos_instance.servo1.angle = int(new_y)
+            new_y = int(numpy.clip(servos_instance.servo1.angle - move_y,
+                                   0.0,180.0))
+            servos_instance.servo1.angle = int(new_y)
             #---
             if (i==4) :
                 omega = 0
                 # object left and looking left 
                 if new_x < 30 and servos_instance.servo0.angle < 45 :
                     omega = -pido.pid(cX,data[0],data[3])
-                    print(omega)
                 # object right and looking right 
                 if new_x > 150 and servos_instance.servo0.angle > 135 : 
                     omega = -pido.pid(cX,data[0],data[3])

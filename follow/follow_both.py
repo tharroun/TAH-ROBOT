@@ -259,7 +259,6 @@ def robot_move(servos_instance : Servos,
                 #---
                 move_z = pidz.pid(40, data[2], data[3])
                 #---
-                #print(move_z,omega)
                 motors_instance.go(move_z,0.0,omega)
                 i=0
             else : i+=1
