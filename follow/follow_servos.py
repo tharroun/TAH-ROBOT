@@ -242,14 +242,12 @@ def robot_move(servos_instance : Servos,
         else :
             #---
             move_x = pidx.pid(cX, data[0], data[3])
-            new_x = int(servos_instance.servo0.angle + move_x)
-            if new_x >= 0 and new_x <= 180: 
-                servos_instance.servo0.angle = int(new_x)
+            new_x = numpy.clip(servos_instance.servo0.angle + move_x, 1.0,179.0)
+            servos_instance.servo0.angle = int(new_x)
             #---
             move_y = pidy.pid(cY, data[1], data[3])
-            new_y = int(servos_instance.servo1.angle - move_y)
-            if new_y >= 0 and new_y <= 180: 
-                servos_instance.servo1.angle = int(new_y)
+            new_y = numpy.clip(servos_instance.servo1.angle - move_y, 1.0,179.0)
+            servos_instance.servo1.angle = int(new_y)
             #---
         #------
         vision_queue.task_done()

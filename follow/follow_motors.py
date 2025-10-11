@@ -241,7 +241,7 @@ def robot_move(servos_instance : Servos,
             motors_instance.stop()
             pass
         else :
-            if (i==5) :
+            if (i==4) :
                 #---
                 omega = -pido.pid(cX, data[0], data[3])
                 #---

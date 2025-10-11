@@ -159,7 +159,7 @@ All other data is shunted to log.
     def send_data(self, data: str):
         self.port.write(data.encode())  
         self.port.flush()
-        time.sleep(0.1)
+        time.sleep(0.02)
         return
 # -----------------------------------
 
