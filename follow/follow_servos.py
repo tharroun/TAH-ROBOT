@@ -261,26 +261,29 @@ def robot_move(servos_instance : Servos,
 if __name__ == "__main__":
     
     my_servos  = Servos()
+    my_servos.servo0.angle = 90
+    my_servos.servo1.angle = 90
     my_motors  = Motors()
+    my_motors.stop()
     my_gamepad = Gamepad()
 
     battery_queue  = multiprocessing.JoinableQueue()
     tracking_queue = multiprocessing.JoinableQueue()
     
+    gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos, my_motors, my_gamepad, battery_queue))
+    gamepad_process.start()
+
     vision_process = multiprocessing.Process(target=robot_see, args=(battery_queue, tracking_queue))
     vision_process.start()
 
     move_process = multiprocessing.Process(target=robot_move, args=(my_servos, my_motors, tracking_queue))
     move_process.start()
 
-    gamepad_process = multiprocessing.Process(target=robot_control, args=(my_servos, my_motors, my_gamepad, battery_queue))
-    gamepad_process.start()
-
-    gamepad_process.join()
     battery_queue.put(PROCESS_ACTION.KILL_THREAD)
-    vision_process.join()
     tracking_queue.put(PROCESS_ACTION.KILL_THREAD)
+    vision_process.join()
     move_process.join()
+    gamepad_process.join()
 
     my_servos.deinit()
     my_motors.deinit()
