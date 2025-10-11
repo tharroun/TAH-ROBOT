@@ -231,8 +231,6 @@ def robot_move(servos_instance : Servos,
     assert (width,height)==(800,480) , print("First data in servo queue is not the width/height.")
     cX = width/2.0
     cY = height/2.0
-    lX = width/4.0
-    rX = 3.0*width/4.0
     
     i = 0
     while True:
@@ -258,14 +256,12 @@ def robot_move(servos_instance : Servos,
             if (i==4) :
                 omega = 0
                 # object left and looking left 
-                if data[0] < lX:
-                #if new_x < 5 and servos_instance.servo0.angle < 15 :
-                    omega = -pido.pid(lX,data[0],data[3])
+                if new_x < 30 and servos_instance.servo0.angle < 45 :
+                    omega = -pido.pid(cX,data[0],data[3])
                     print(omega)
                 # object right and looking right 
-                if data[0] > rX:
-                #if new_x > 175 and servos_instance.servo0.angle > 165 : 
-                    omega = -pido.pid(rX,data[0],data[3])
+                if new_x > 150 and servos_instance.servo0.angle > 135 : 
+                    omega = -pido.pid(cX,data[0],data[3])
                 motors_instance.go(0,0,omega)
                 i=0
             else : i+=1
