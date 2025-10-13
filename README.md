@@ -1,5 +1,8 @@
 # TAH-ROBOT
 
+
+<img width="2591" height="731" alt="flow drawio" src="https://github.com/user-attachments/assets/c806c86f-ade7-41e9-84ff-45a436a2bca9" />
+
 ## Servo control
 We are using the Adafruit library for the MZ996R servos on the PCA9685 16-channel board
 ```
