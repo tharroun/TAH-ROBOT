@@ -23,6 +23,9 @@ pip3 install evdev
 
 ## To-do list
 
+### Programming
+- Add `join`s for the two main JoinableQueues.
+
 ### Construction
 
 ### Next steps
