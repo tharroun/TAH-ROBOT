@@ -5,6 +5,8 @@
 
 ## Servo control
 We are using the Adafruit library for the MZ996R servos on the PCA9685 16-channel board
+
+## Needed files in venv
 ```
 sudo apt install joystick
 apt install python3-pyqt6
@@ -23,14 +25,14 @@ pip3 install evdev
 
 ### Construction
 
-### Programming
-- Drive
-    - add pid control to the motors
-    - tune pid for the servos
+### Next steps
 - Motors
     - what is the deadtime for the 520 motor?
     - calibrate the speed using the encoders
 - Servos
-    - how to find the max/min of the servo?
-    - how to re-center the servos?
+    - how to find the max/min without collision of the servo?
+    - how to more easily re-center the servos?
+- Wishlist
+    - LIDAR?
+    - NVMe SSD on RPi
 
