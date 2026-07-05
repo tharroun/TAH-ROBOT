@@ -9,7 +9,7 @@ if [ $RESPONSE -eq 0 ]; then
   echo "Running!"
   source /home/tah/.bashrc
   source /home/tah/GitHub/TAH-ROBOT/.venv/bin/activate
-  python3 /home/tah/GitHub/TAH-ROBOT/follow/follow.py
+  python3 /home/tah/GitHub/TAH-ROBOT/follow/follow_both_2.py
 else 
   echo "Not ready"
 fi

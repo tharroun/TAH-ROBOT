@@ -72,9 +72,9 @@ class Motors:
         self.set_pulse_phase(30)
         self.set_pulse_line(11)
         self.set_wheel_diam(95)
-        self.send_data("$upload:0,0,0#")
-        self.control_pwm(0,0,0,0)
         self.send_upload_command(EncoderMode.NOTHING)
+        #self.send_data("$upload:0,0,0#")
+        self.control_pwm(0,0,0,0)
         self.send_data("$read_flash#")
         if self.log: self.logger.info("Initialized motor parameters.")
 
@@ -254,13 +254,13 @@ All other data is shunted to log.
 
 if __name__ == "__main__":
 
-    motors = Motors()
+    motors = Motors(log=True)
     print(motors.get_battery())
 
     
-    #ybmc.control_pwm(0, 0, 0, 500) #rotate cw
-    #time.sleep(2)
-    #ybmc.control_pwm(0, 0, 0, 0)
+    motors.control_pwm(0, 0, 0, 500) #rotate cw
+    time.sleep(2)
+    motors.control_pwm(0, 0, 0, 0)
 
     '''
     motors.send_upload_command(EncoderMode.SPEED)

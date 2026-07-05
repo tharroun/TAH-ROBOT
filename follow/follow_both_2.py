@@ -223,8 +223,8 @@ def robot_move(servos_instance : Servos,
     
     pidz = MyPID(60.0,0,0)
     pido = MyPID(8.0,0,0)
-    pidx = MyPID(0.025,0.0001,0.001)
-    pidy = MyPID(0.025,0.0001,0.001)
+    pidx = MyPID(0.005,0.000,0.00)
+    pidy = MyPID(0.005,0.000,0.00)
 
     (width,height) = vision_queue.get()
     vision_queue.task_done()
