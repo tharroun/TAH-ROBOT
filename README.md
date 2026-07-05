@@ -6,6 +6,18 @@
 ## Servo control
 We are using the Adafruit library for the MZ996R servos on the PCA9685 16-channel board
 
+## Seeting up github
+```
+sudo apt install git
+sudo apt install gh
+git config --global user.name tharroun
+get config --global user.email thad.harroun@gmail.com
+gh aith login
+>> GitHub.com
+>> SSH
+>> 
+```
+
 ## Needed files in venv
 ```
 sudo apt install joystick
