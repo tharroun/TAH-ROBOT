@@ -14,8 +14,8 @@ git config --global user.name tharroun
 get config --global user.email thad.harroun@gmail.com
 gh aith login
 >> GitHub.com
->> SSH
->> 
+>>> etc.
+gh repo clone tharroun/TAH-ROBOT
 ```
 
 ## Needed files in venv
