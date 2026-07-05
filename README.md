@@ -23,7 +23,7 @@ gh repo clone tharroun/TAH-ROBOT
 sudo apt install joystick
 apt install python3-pyqt6
 apt install python3-opencv
-apt install rpicamera
+apt install rpicam-apps
 cd TAH-ROBOT
 python3 -m venv .venv --system-site-packages
 source .venv/bin/activate
