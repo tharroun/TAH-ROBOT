@@ -20,7 +20,8 @@ class Gamepad:
         found_gamepad = False
         devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
         for device in devices:
-            if 'X-Box' in device.name:
+            if '8Bitdo'in device.name:  # Bluetooth BBitdo
+            #if 'X-Box' in device.name: # USB 8Bitdo
                 found_gamepad = True
                 break
         if found_gamepad: 
