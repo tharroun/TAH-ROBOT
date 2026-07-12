@@ -11,8 +11,8 @@ We are using the Adafruit library for the MZ996R servos on the PCA9685 16-channe
 sudo apt install git
 sudo apt install gh
 git config --global user.name tharroun
-get config --global user.email thad.harroun@gmail.com
-gh aith login
+git config --global user.email thad.harroun@xxxxx.xxx
+gh auth login
 >> GitHub.com
 >>> etc.
 gh repo clone tharroun/TAH-ROBOT
