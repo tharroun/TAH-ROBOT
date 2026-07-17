@@ -79,14 +79,14 @@ async def drive_loop(gamepad : Gamepad,
             
         rcw  = gamepad.gamepad.absinfo(evdev.ecodes.ABS_RZ).value
         rccw = gamepad.gamepad.absinfo(evdev.ecodes.ABS_Z).value
-        if rcw == 255 and rccw == 0   : omega = gamepad.rotation_speed
-        elif rcw == 0 and rccw == 255 : omega = -gamepad.rotation_speed
+        if rcw == 1023 and rccw == 0   : omega = gamepad.rotation_speed
+        elif rcw == 0 and rccw == 1023 : omega = -gamepad.rotation_speed
         else : omega = 0
 
-        speed_x = gamepad.motors_mx*math.fabs(mx)
-        speed_y = gamepad.motors_my*math.fabs(my)
+        speed_x = gamepad.motors_mx*math.fabs(mx)+gamepad.motors_bx
+        speed_y = gamepad.motors_my*math.fabs(my)+gamepad.motors_by
         speed = math.sqrt(speed_x*speed_x+speed_y*speed_y)
-        direction = math.atan2(mx,my)*180.0/math.pi + 180.0
+        direction = math.atan2(mx-gamepad.motors_hx,my-gamepad.motors_hy)*180.0/math.pi+180.0
         motors.go(speed,direction,omega)
         await asyncio.sleep(0.1)
     motors.stop()
@@ -221,8 +221,10 @@ def robot_move(servos_instance : Servos,
                motors_instance : Motors,
                vision_queue : type[multiprocessing.JoinableQueue]):
     
-    pidz = MyPID(32.0,0,0)
-    pido = MyPID(6.0,0,0)
+    pidz = MyPID(60.0,0,0)
+    pido = MyPID(8.0,0,0)
+    pidx = MyPID(0.005,0.000,0.00)
+    pidy = MyPID(0.005,0.000,0.00)
 
     (width,height) = vision_queue.get()
     vision_queue.task_done()
@@ -241,16 +243,18 @@ def robot_move(servos_instance : Servos,
             motors_instance.stop()
             pass
         else :
+            
+            #---
             if (i==4) :
                 #---
                 omega = -pido.pid(cX, data[0], data[3])
                 #---
                 move_z = pidz.pid(40, data[2], data[3])
                 #---
-                #print(move_z,omega)
                 motors_instance.go(move_z,0.0,omega)
-                i=0
+                i = 0
             else : i+=1
+            #---
         #------
         vision_queue.task_done()
     print("Finished robot_move")
@@ -285,6 +289,8 @@ if __name__ == "__main__":
     vision_process.join()
     move_process.join()
 
+    my_servos.servo0.angle = 90
+    my_servos.servo1.angle = 90
     my_servos.deinit()
     my_motors.deinit()
     my_gamepad.deinit()

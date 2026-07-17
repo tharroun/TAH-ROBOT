@@ -31,6 +31,11 @@ class PROCESS_ACTION(enum.Enum):
     KILL_THREAD = 1
     LOST_OBJECT = 2
 
+class FOLLOW_ACTION(enum.Enum):
+    SERVO = 1
+    MOTOR = 2
+    BOTH  = 3
+
 # -----------------------------------
 async def event_loop(gamepad : Gamepad,
                      servos  : Servos):
@@ -79,14 +84,14 @@ async def drive_loop(gamepad : Gamepad,
             
         rcw  = gamepad.gamepad.absinfo(evdev.ecodes.ABS_RZ).value
         rccw = gamepad.gamepad.absinfo(evdev.ecodes.ABS_Z).value
-        if rcw == 255 and rccw == 0   : omega = gamepad.rotation_speed
-        elif rcw == 0 and rccw == 255 : omega = -gamepad.rotation_speed
+        if rcw == 1023 and rccw == 0   : omega = gamepad.rotation_speed
+        elif rcw == 0 and rccw == 1023 : omega = -gamepad.rotation_speed
         else : omega = 0
 
-        speed_x = gamepad.motors_mx*math.fabs(mx)
-        speed_y = gamepad.motors_my*math.fabs(my)
+        speed_x = gamepad.motors_mx*math.fabs(mx)+gamepad.motors_bx
+        speed_y = gamepad.motors_my*math.fabs(my)+gamepad.motors_by
         speed = math.sqrt(speed_x*speed_x+speed_y*speed_y)
-        direction = math.atan2(mx,my)*180.0/math.pi + 180.0
+        direction = math.atan2(mx-gamepad.motors_hx,my-gamepad.motors_hy)*180.0/math.pi+180.0
         motors.go(speed,direction,omega)
         await asyncio.sleep(0.1)
     motors.stop()
@@ -219,12 +224,13 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
 # -------------------------------------------
 def robot_move(servos_instance : Servos,
                motors_instance : Motors,
-               vision_queue : type[multiprocessing.JoinableQueue]):
+               vision_queue : type[multiprocessing.JoinableQueue],
+               follow_action: FOLLOW_ACTION):
     
     pidz = MyPID(60.0,0,0)
     pido = MyPID(8.0,0,0)
-    pidx = MyPID(0.025,0.0001,0.001)
-    pidy = MyPID(0.025,0.0001,0.001)
+    pidx = MyPID(0.005,0.000,0.00)
+    pidy = MyPID(0.005,0.000,0.00)
 
     (width,height) = vision_queue.get()
     vision_queue.task_done()
@@ -243,6 +249,7 @@ def robot_move(servos_instance : Servos,
             motors_instance.stop()
             pass
         else :
+            #---
             move_x = pidx.pid(cX, data[0], data[3])
             new_x = numpy.clip(servos_instance.servo0.angle + move_x, 1.0,179.0)
             servos_instance.servo0.angle = int(new_x)
@@ -251,9 +258,15 @@ def robot_move(servos_instance : Servos,
             new_y = numpy.clip(servos_instance.servo1.angle - move_y, 1.0,179.0)
             servos_instance.servo1.angle = int(new_y)
             #---
-            if (i==2) :
+            if (i==4) :
                 #---
-                omega = -pido.pid(cX, data[0], data[3])
+                omega = 0
+                # object left and looking left 
+                if new_x < 30 and servos_instance.servo0.angle < 45 :
+                    omega = -pido.pid(cX, data[0], data[3])
+                # object right and looking right 
+                if new_x > 150 and servos_instance.servo0.angle > 135 : 
+                    omega = -pido.pid(cX, data[0], data[3])
                 #---
                 move_z = pidz.pid(40, data[2], data[3])
                 #---
@@ -270,6 +283,20 @@ def robot_move(servos_instance : Servos,
 
 if __name__ == "__main__":
     
+    # Accessing command-line arguments   
+    arguments   = sys.argv       # List of arguments   
+    script_name = sys.argv[0]  # Name of the script   
+    if (len(sys.argv) != 2) :
+        raise Exception("Please provide one argument (servo, motor, both).") 
+    if   (sys.argv[1].lower()=='servo') :
+        follow_action = FOLLOW_ACTION.SERVO
+    elif (sys.argv[1].lower()=='motor') :
+        follow_action = FOLLOW_ACTION.MOTOR
+    elif (sys.argv[1].lower()=='both') :
+        follow_action = FOLLOW_ACTION.BOTH
+    else:
+        raise Exception("Please provide one argument (servo, motor, both).")
+
     my_servos  = Servos()
     my_servos.servo0.angle = 90
     my_servos.servo1.angle = 90
@@ -286,7 +313,7 @@ if __name__ == "__main__":
     vision_process = multiprocessing.Process(target=robot_see, args=(battery_queue, tracking_queue))
     vision_process.start()
 
-    move_process = multiprocessing.Process(target=robot_move, args=(my_servos, my_motors, tracking_queue))
+    move_process = multiprocessing.Process(target=robot_move, args=(my_servos, my_motors, tracking_queue, follow_action))
     move_process.start()
 
     gamepad_process.join()
