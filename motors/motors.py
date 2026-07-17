@@ -242,11 +242,11 @@ All other data is shunted to log.
         rad_per_deg = math.pi / 180.0
         vx = velocity * math.cos(direction * rad_per_deg)
         vy = velocity * math.sin(direction * rad_per_deg)
-        vp = -angular_rate # * (self.W + self.L)
-        v1 = int(vx - vy - vp)
+        vp = angular_rate # * (self.W + self.L)
+        v1 = int(vx - vy + vp)
         v2 = int(vx + vy - vp)
         v3 = int(vx + vy + vp)
-        v4 = int(vx - vy + vp)
+        v4 = int(vx - vy - vp)
         self.control_pwm(-v4, v3, v2, -v1)
         return
 # -----------------------------------

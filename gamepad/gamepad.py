@@ -22,7 +22,7 @@ class Gamepad:
         devices = [evdev.InputDevice(path) for path in evdev.list_devices()]
         for device in devices:
             if '8Bitdo'in device.name:  # Bluetooth BBitdo
-            #if 'X-Box' in device.name: # USB 8Bitdo
+            #if 'X-Box' in device.name: # USB 8Bitdo default
                 found_gamepad = True
                 break
         if found_gamepad: 
@@ -70,7 +70,7 @@ class Gamepad:
         self.motors_by = (-1200) - (self.motors_mx*absinfo.min)
         self.motors_hy = (absinfo.max-absinfo.min)/2.0
 
-        self.rotation_speed = 300
+        self.rotation_speed = 900
         return
     
     def deinit(self):

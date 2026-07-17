@@ -43,7 +43,7 @@ async def event_loop(gamepad : Gamepad,
             if event.code == evdev.ecodes.ABS_HAT0Y :
                 if event.value ==  1 : gamepad.rotation_speed -= 50
                 if event.value == -1 : gamepad.rotation_speed += 50
-                if gamepad.rotation_speed > 900 : gamepad.rotation_speed = 900
+                if gamepad.rotation_speed > 1200 : gamepad.rotation_speed = 1200
                 if gamepad.rotation_speed < 0   : gamepad.rotation_speed = 0
         
     print("Finished event_loop")
