@@ -1,30 +1,21 @@
-INFO:motors:Opened serial port.
-INFO:motors:Started listening to serial port.
-INFO:motors:Set mtype:OK!
-INFO:motors:Set deadzone:OK!
-INFO:motors:Set mphase:OK!
-INFO:motors:Set mline:OK!
-INFO:motors:Set wdiameter:OK!
-INFO:motors:read_flash:OK!
-Motor_Version:1.7.3
+INFO:__main__:Opened serial port.
+INFO:__main__:Started listening to serial port.
+INFO:__main__:Set mtype:OK!
+INFO:__main__:Set deadzone:OK!
+INFO:__main__:Set mphase:OK!
+INFO:__main__:Set mline:OK!
+INFO:__main__:Set wdiameter:OK!
+INFO:__main__:read_flash:OK!
+Motor_Version:1.
+INFO:__main__:Initialized motor parameters.
+INFO:__main__:7.3
 Motor_type:1
-Dead_Zone:150
-INFO:motors:0
+Dead_Zone:1500
 Pulse_Line:11
 Pulse_Phase:30
+INFO:__main__:
 wheel_diameter:95.000
-INFO:motors:P:0.100	 I:0.002	 D:0.010
-INFO:motors:Initialized motor parameters.
-INFO:picamera2.picamera2:Initialization successful.
-INFO:picamera2.picamera2:Camera now open.
-INFO:picamera2.picamera2:Camera configuration has been adjusted!
-INFO:picamera2.picamera2:Configuration successful!
-INFO:picamera2.picamera2:Camera configuration has been adjusted!
-INFO:picamera2.picamera2:Configuration successful!
-INFO:picamera2.picamera2:Camera configuration has been adjusted!
-INFO:picamera2.picamera2:Configuration successful!
-INFO:picamera2.picamera2:Camera configuration has been adjusted!
-INFO:picamera2.picamera2:Configuration successful!
-INFO:picamera2.picamera2:Camera started
-INFO:motors:Stopped listening thread.
-INFO:motors:Closed serial port.
+P:0.100	 I:0.002	 D:0.010	 
+fail,Command not found!
+INFO:__main__:Stopped listening thread.
+INFO:__main__:Closed serial port.

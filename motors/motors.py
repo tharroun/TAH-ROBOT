@@ -227,13 +227,13 @@ All other data is shunted to log.
 # -----------------------------------
     def go(self, 
            velocity: float=0, 
-           direction: float=90.0, 
+           direction: float=0.0, 
            angular_rate: float=0):
         """
         Use polar coordinates to control moving
-        motor1 v1|  ↑  |v2 motor3
-                 |     |
-        motor3 v2|     |v4 motor4
+        motor1 v1 (-)|  ↑  |v3 (+) motor2
+                     |     |
+        motor3 v3 (+)|     |v1 (-) motor4
         :param velocity: mm/s
         :param direction: Moving direction 0~360deg, 90deg<--- ↑ ---> 270deg
         :param angular_rate:  The speed at which the chassis rotates
@@ -247,7 +247,7 @@ All other data is shunted to log.
         v2 = int(vx + vy - vp)
         v3 = int(vx + vy + vp)
         v4 = int(vx - vy + vp)
-        self.control_pwm(v2, -v4, -v1, v3)
+        self.control_pwm(-v4, v3, v2, -v1)
         return
 # -----------------------------------
 # -----------------------------------
@@ -258,8 +258,14 @@ if __name__ == "__main__":
     print(motors.get_battery())
 
     
-    motors.control_pwm(0, 0, 0, 500) #rotate cw
-    time.sleep(2)
+    motors.control_pwm(-1200, 0, 0, 0)
+    time.sleep(1)
+    motors.control_pwm(0, 1200, 0, 0)
+    time.sleep(1)
+    motors.control_pwm(0, 0, 1200, 0)
+    time.sleep(1)
+    motors.control_pwm(0, 0, 0, -1200)
+    time.sleep(1)
     motors.control_pwm(0, 0, 0, 0)
 
     '''
@@ -276,10 +282,10 @@ if __name__ == "__main__":
     time.sleep(0.5)
     '''
 
-    v = 100
-    while v < 1500 :
-        motors.go(v, 0.0, 0.0)
-        time.sleep(0.01)
+    v = 1000
+    while v < 1800 :
+        motors.go(v, 180.0, 0.0)
+        time.sleep(0.5)
         v += 100
     motors.stop()
     motors.deinit()

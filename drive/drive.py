@@ -28,7 +28,8 @@ async def event_loop(gamepad : Gamepad,
                      servos  : Servos):
     sx,sy=0,0
     async for event in gamepad.gamepad.async_read_loop() :
-        if event.code == evdev.ecodes.BTN_MODE and event.value == 0:
+        #if event.code == evdev.ecodes.BTN_MODE and event.value == 0: #USB 8Bitdo
+        if event.code == evdev.ecodes.KEY_MENU and event.value == 0:  #Bluetooth 8Bitdo X+start
             gamepad.running = False
             break
 
@@ -71,14 +72,14 @@ async def drive_loop(gamepad : Gamepad,
             
         rcw  = gamepad.gamepad.absinfo(evdev.ecodes.ABS_RZ).value
         rccw = gamepad.gamepad.absinfo(evdev.ecodes.ABS_Z).value
-        if rcw == 255 and rccw == 0   : omega = gamepad.rotation_speed
-        elif rcw == 0 and rccw == 255 : omega = -gamepad.rotation_speed
+        if rcw == 1023 and rccw == 0   : omega = gamepad.rotation_speed
+        elif rcw == 0 and rccw == 1023 : omega = -gamepad.rotation_speed
         else : omega = 0
 
-        speed_x = gamepad.motors_mx*math.fabs(mx)
-        speed_y = gamepad.motors_my*math.fabs(my)
+        speed_x = gamepad.motors_mx*math.fabs(mx)+gamepad.motors_bx
+        speed_y = gamepad.motors_my*math.fabs(my)+gamepad.motors_by
         speed = math.sqrt(speed_x*speed_x+speed_y*speed_y)
-        direction = math.atan2(mx,my)*180.0/math.pi + 180.0
+        direction = math.atan2(mx-gamepad.motors_hx,my-gamepad.motors_hy)*180.0/math.pi+180.0
         motors.go(speed,direction,omega)
         await asyncio.sleep(0.1)
     motors.stop()
