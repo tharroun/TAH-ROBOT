@@ -31,9 +31,10 @@ class PROCESS_ACTION(enum.Enum):
     LOST_OBJECT = 2
 
 class FOLLOW_ACTION(enum.Enum):
-    SERVO = 1
-    MOTOR = 2
-    BOTH  = 3
+    DRIVE = 1
+    SERVO = 2
+    MOTOR = 3
+    BOTH  = 4
 
 # -----------------------------------
 async def event_loop(gamepad : Gamepad,
@@ -291,10 +292,12 @@ if __name__ == "__main__":
     arguments   = sys.argv       # List of arguments   
     script_name = sys.argv[0]  # Name of the script   
     if (len(sys.argv) != 2) :
-        raise Exception("Please provide one argument (servo, motor, both).") 
-    if   (sys.argv[1].lower()=='servo') :
+        raise Exception("Please provide one argument (drive, servo, motor, both).") 
+    if   (sys.argv[1].lower()=='drive') :
+        follow_action = FOLLOW_ACTION.DRIVE
+    elif   (sys.argv[1].lower()=='servos') :
         follow_action = FOLLOW_ACTION.SERVO
-    elif (sys.argv[1].lower()=='motor') :
+    elif (sys.argv[1].lower()=='motors') :
         follow_action = FOLLOW_ACTION.MOTOR
     elif (sys.argv[1].lower()=='both') :
         follow_action = FOLLOW_ACTION.BOTH

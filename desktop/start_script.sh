@@ -35,7 +35,7 @@ esac
 exec 3>&1
 selection2=$(dialog \
   --backtitle "ROBOT CONTROL" \
-  --title "Robot function" \
+  --title "FUNCTION CHECKL" \
   --clear \
   --cancel-label "CANCEL" \
   --menu "MAKE A CHOICE:" 0 0 4 \
@@ -62,14 +62,30 @@ clear
 case $selection2 in
   "A" )
     echo "JUST DRIVE"
+    source /home/tah/.bashrc
+    source /home/tah/GitHub/TAH-ROBOT/.venv/bin/activate
+    python3 /home/tah/GitHub/TAH-ROBOT/follow/follow_both_2.py drive
     ;;
   "B" )
     echo "FOLLOW WITH SERVOS ONLY"
+    echo "JUST DRIVE"
+    source /home/tah/.bashrc
+    source /home/tah/GitHub/TAH-ROBOT/.venv/bin/activate
+    python3 /home/tah/GitHub/TAH-ROBOT/follow/follow_both_2.py servos
     ;;
   "C" )
-    echo "FOLLOW WITH MOTORS ONLY"
+    echo "FOLLOW WITH SERVOS ONLY"
+    echo "JUST DRIVE"
+    source /home/tah/.bashrc
+    source /home/tah/GitHub/TAH-ROBOT/.venv/bin/activate
+    python3 /home/tah/GitHub/TAH-ROBOT/follow/follow_both_2.py motors
     ;;
   "D" )
     echo "FOLLOW WITH SERVOS AND MOTORS"
+    echo "FOLLOW WITH SERVOS ONLY"
+    echo "JUST DRIVE"
+    source /home/tah/.bashrc
+    source /home/tah/GitHub/TAH-ROBOT/.venv/bin/activate
+    python3 /home/tah/GitHub/TAH-ROBOT/follow/follow_both_2.py both
     ;;
 esac
