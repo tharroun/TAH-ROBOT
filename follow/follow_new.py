@@ -176,8 +176,8 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
         
         if circles is not None:
             circles = numpy.uint16(numpy.around(circles))
-            circles = sorted(circles, key=itemgetter(1), reverse=True)
-            print(circles,circles[0])
+            print(circles)
+            #circles = sorted(circles, key=itemgetter(1), reverse=True)
             i = circles[0]
             #-------------------------------
             cv2.circle(frame, (i[0], i[1]), i[2], (255, 0, 255), 3)    
