@@ -186,7 +186,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
             fps = numpy.round(1/dt,1)
             t1 = t2
             cv2.putText(frame, str(fps)+" FPS", 
-                        org = (40,70), 
+                        org = (40,100), 
                         fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
                         fontScale = 1, 
                         color = (255, 0, 0), 
@@ -202,12 +202,21 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
             if volts is PROCESS_ACTION.KILL_THREAD: 
                 break
         cv2.putText(frame, volts, 
-                    org = (40,40), 
+                    org = (40,70), 
                     fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
                     fontScale = 1, 
                     color = (255, 0, 0), 
                     thickness = 2, 
                     lineType = cv2.LINE_8)        
+        #-------------------------------
+        t = os.popen('vcgencmd measure_temp').readline().split('=')[1].rstrip()
+        cv2.putText(frame, t, 
+                    org = (40,40), 
+                    fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
+                    fontScale = 1, 
+                    color = (255, 0, 0), 
+                    thickness = 2, 
+                    lineType = cv2.LINE_8)
         #-------------------------------
         cv2.imshow("Camera", frame)
         time.sleep(0.08)
@@ -240,7 +249,6 @@ def robot_move(servos_instance : Servos,
     cX = width/2.0
     cY = height/2.0
     
-    i = 0
     while True:
         data = vision_queue.get()
         if data is PROCESS_ACTION.KILL_THREAD:
@@ -265,29 +273,22 @@ def robot_move(servos_instance : Servos,
             if (FOLLOW_ACTION.MOTORS in follow_action):
                 if (FOLLOW_ACTION.SERVOS in follow_action):
                     #---
-                    if (i==1) : # Throw away every 4 frames.
-                        #---
-                        omega = 0
-                        # object left and looking left 
-                        if new_x < 30 and servos_instance.servo0.angle < 45 :
-                            omega = -pido.pid(cX, data[0], data[3])
-                        # object right and looking right 
-                        if new_x > 150 and servos_instance.servo0.angle > 135 : 
-                            omega = -pido.pid(cX, data[0], data[3])
-                        #---
-                        move_z = pidz.pid(40, data[2], data[3])
-                        #---
-                        motors_instance.go(move_z,0.0,omega)
-                        i = 0
-                    #---
-                    else : i+=1
-                else:
-                    if (i==1) : # Throw away every 4 frames.
+                    omega = 0
+                    # object left and looking left 
+                    if new_x < 30 and servos_instance.servo0.angle < 45 :
                         omega = -pido.pid(cX, data[0], data[3])
-                        move_z = pidz.pid(40, data[2], data[3])
-                        motors_instance.go(move_z,0.0,omega)
-                        i = 0
-                    else : i+=1
+                    # object right and looking right 
+                    if new_x > 150 and servos_instance.servo0.angle > 135 : 
+                        omega = -pido.pid(cX, data[0], data[3])
+                    #---
+                    move_z = pidz.pid(40, data[2], data[3])
+                    #---
+                    motors_instance.go(move_z,0.0,omega)
+                    #---
+                else:
+                    omega = -pido.pid(cX, data[0], data[3])
+                    move_z = pidz.pid(40, data[2], data[3])
+                    motors_instance.go(move_z,0.0,omega)
             #---------------------
         #------
         vision_queue.task_done()
