@@ -1,8 +1,11 @@
+import sys
 import cv2
 import time
 import pprint
 from   picamera2 import Picamera2
 import numpy
+
+sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 
 class Camera:
     """
@@ -42,7 +45,7 @@ class Camera:
 
 # ------------------------------------------
 def view(my_camera : Camera):
-    volts = "0.0 V"
+    
     fps = "0.0 FPS"
     t1 = time.perf_counter() 
     while True:
