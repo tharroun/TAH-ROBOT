@@ -167,7 +167,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
 
         green_frame = cv2.bitwise_and(frame,frame,mask=color_mask)
         gray_frame = cv2.cvtColor(green_frame, cv2.COLOR_BGR2GRAY)
-        gray_frame = cv2.medianBlur(gray_frame, 7)
+        #gray_frame = cv2.medianBlur(gray_frame, 7)
 
         rows = gray_frame.shape[0]
         circles = cv2.HoughCircles(gray_frame, cv2.HOUGH_GRADIENT, 1, rows / 2,
@@ -219,6 +219,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
                     lineType = cv2.LINE_8)
         #-------------------------------
         cv2.imshow("Camera", frame)
+        # This time delay slows the fps and causes the RPi to run cooler!
         time.sleep(0.05)
         #-------------------------------
         if cv2.waitKey(1)==ord('q'):
