@@ -8,8 +8,7 @@ import cv2
 import numpy
 import yaml
 import os.path 
-import enum
-from operator import itemgetter
+import enum 
 
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/servos')
@@ -158,71 +157,59 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
     volts = "0.0 V"
     while True:
         im  = my_camera.picam2.capture_array()
+        #frame = cv2.resize(im,(596,324),interpolation = cv2.INTER_CUBIC)
         frame = cv2.resize(im,(800,480),interpolation = cv2.INTER_CUBIC)
         #-------------------------------
         frame_hsv  = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
         color_mask = cv2.inRange(frame_hsv, COLOR_MIN, COLOR_MAX)
         color_mask = cv2.morphologyEx(color_mask, cv2.MORPH_CLOSE, small_kernel, iterations = 1)
-        color_mask = cv2.morphologyEx(color_mask, cv2.MORPH_OPEN,  small_kernel, iterations = 7)
-
-        green_frame = cv2.bitwise_and(frame,frame,mask=color_mask)
-        gray_frame = cv2.cvtColor(green_frame, cv2.COLOR_BGR2GRAY)
-        #gray_frame = cv2.medianBlur(gray_frame, 7) #Doesn't seem to be needed.
-
-        rows = gray_frame.shape[0]
-        circles = cv2.HoughCircles(gray_frame, cv2.HOUGH_GRADIENT, 1, rows / 2,
-                               param1=300, param2=12,
-                               minRadius=5, maxRadius=150)
-        
-        if circles is not None:
-            circles = numpy.uint16(numpy.around(circles))
-            # Assume only one circle found, mostly becuase I don't 
-            # know how to sort the results.
-            # circles = sorted(circles, key=itemgetter(1), reverse=True)
-            #-------------------------------
-            cv2.circle(frame, (circles[0][0][0], circles[0][0][1]), 
-                       circles[0][0][2], (255, 0, 255), 3)    
-            #-------------------------------
-            t2 = time.perf_counter()
-            dt = t2-t1
-            fps = numpy.round(1/dt,1)
-            t1 = t2
-            cv2.putText(frame, str(fps)+" FPS", 
-                        org = (40,100), 
-                        fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
-                        fontScale = 1, 
-                        color = (255, 0, 0), 
-                        thickness = 2, 
-                        lineType = cv2.LINE_8)
-            #-------------------------------
-            tracking_queue.put((i[0],i[1],i[2],dt))
-        else: 
-            tracking_queue.put(PROCESS_ACTION.LOST_OBJECT)   
+        color_mask = cv2.morphologyEx(color_mask, cv2.MORPH_OPEN,  small_kernel, iterations = 1)
+        #-------------------------------
+        contours,hierarchy = cv2.findContours(color_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        if (contours):
+            if (len(contours)>1) : 
+                contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
+            # ------------------------------------------------
+            # area = cv2.contourArea(contours[0])
+            # arclength = cv2.arcLength(contours[0],True)
+            # circularity = 4*numpy.pi*area/(arclength*arclength)
+            # NEXT TIME:https://docs.opencv.org/4.11.0/d4/d70/tutorial_hough_circle.html
+            # ------------------------------------------------
+            M = cv2.moments(contours[0])
+            cx = int(M['m10']/M['m00'])
+            cy = int(M['m01']/M['m00'])
+            radius = int(numpy.sqrt(M['m00']/numpy.pi))
+            # if circularity > 0.6 and circularity < 1.4:
+            if radius > 5: # Minimum radius (in pixels) of the found object to be considered the sphere.
+                t2 = time.perf_counter() 
+                dt = t2-t1
+                fps = numpy.round(1/dt,1)
+                t1 = t2
+                cv2.putText(frame, str(fps)+" FPS", 
+                            org = (40,70), 
+                            fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
+                            fontScale = 1, 
+                            color = (255, 0, 0), 
+                            thickness = 2, 
+                            lineType = cv2.LINE_8)
+                cv2.drawContours(frame,contours,0,(0,0,255),5)
+                tracking_queue.put((cx,cy,radius,dt))
+            else: 
+                tracking_queue.put(PROCESS_ACTION.LOST_OBJECT)   
         #-------------------------------
         if battery_queue.empty() == False : 
             volts = battery_queue.get() 
             if volts is PROCESS_ACTION.KILL_THREAD: 
                 break
         cv2.putText(frame, volts, 
-                    org = (40,70), 
+                    org = (40,40), 
                     fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
                     fontScale = 1, 
                     color = (255, 0, 0), 
                     thickness = 2, 
                     lineType = cv2.LINE_8)        
         #-------------------------------
-        t = os.popen('vcgencmd measure_temp').readline().split('=')[1].rstrip()
-        cv2.putText(frame, t, 
-                    org = (40,40), 
-                    fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
-                    fontScale = 1, 
-                    color = (255, 0, 0), 
-                    thickness = 2, 
-                    lineType = cv2.LINE_8)
-        #-------------------------------
         cv2.imshow("Camera", frame)
-        # This time delay slows the fps and causes the RPi to run cooler!
-        time.sleep(0.05)
         #-------------------------------
         if cv2.waitKey(1)==ord('q'):
             break
@@ -242,7 +229,7 @@ def robot_move(servos_instance : Servos,
                follow_action: FOLLOW_ACTION):
     
     pidz = MyPID(40.0,0,0)
-    pido = MyPID( 4.0,0,0)
+    pido = MyPID( 6.0,0,0)
     pidx = MyPID(0.01,0.000,0.002)
     pidy = MyPID(0.03,0.000,0.002)
 
@@ -252,6 +239,7 @@ def robot_move(servos_instance : Servos,
     cX = width/2.0
     cY = height/2.0
     
+    i = 0
     while True:
         data = vision_queue.get()
         if data is PROCESS_ACTION.KILL_THREAD:
@@ -276,22 +264,29 @@ def robot_move(servos_instance : Servos,
             if (FOLLOW_ACTION.MOTORS in follow_action):
                 if (FOLLOW_ACTION.SERVOS in follow_action):
                     #---
-                    omega = 0
-                    # object left and looking left 
-                    if new_x < 30 and servos_instance.servo0.angle < 45 :
-                        omega = -pido.pid(cX, data[0], data[3])
-                    # object right and looking right 
-                    if new_x > 150 and servos_instance.servo0.angle > 135 : 
-                        omega = -pido.pid(cX, data[0], data[3])
+                    if (i==4) : # Throw away every 4 frames.
+                        #---
+                        omega = 0
+                        # object left and looking left 
+                        if new_x < 30 and servos_instance.servo0.angle < 45 :
+                            omega = -pido.pid(cX, data[0], data[3])
+                        # object right and looking right 
+                        if new_x > 150 and servos_instance.servo0.angle > 135 : 
+                            omega = -pido.pid(cX, data[0], data[3])
+                        #---
+                        move_z = pidz.pid(40, data[2], data[3])
+                        #---
+                        motors_instance.go(move_z,0.0,omega)
+                        i = 0
                     #---
-                    move_z = pidz.pid(40, data[2], data[3])
-                    #---
-                    motors_instance.go(move_z,0.0,omega)
-                    #---
+                    else : i+=1
                 else:
-                    omega = -pido.pid(cX, data[0], data[3])
-                    move_z = pidz.pid(40, data[2], data[3])
-                    motors_instance.go(move_z,0.0,omega)
+                    if (i==4) : # Throw away every 4 frames.
+                        omega = -pido.pid(cX, data[0], data[3])
+                        move_z = pidz.pid(40, data[2], data[3])
+                        motors_instance.go(move_z,0.0,omega)
+                        i = 0
+                    else : i+=1
             #---------------------
         #------
         vision_queue.task_done()
