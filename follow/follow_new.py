@@ -210,7 +210,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
                     lineType = cv2.LINE_8)        
         #-------------------------------
         cv2.imshow("Camera", frame)
-        time.sleep(0.1)
+        time.sleep(0.08)
         #-------------------------------
         if cv2.waitKey(1)==ord('q'):
             break
@@ -229,8 +229,8 @@ def robot_move(servos_instance : Servos,
                vision_queue : type[multiprocessing.JoinableQueue],
                follow_action: FOLLOW_ACTION):
     
-    pidz = MyPID(40.0,0,0)
-    pido = MyPID( 6.0,0,0)
+    pidz = MyPID(40.0,0.5,0)
+    pido = MyPID( 8.0,0.5,0)
     pidx = MyPID(0.01,0.000,0.002)
     pidy = MyPID(0.03,0.000,0.002)
 
@@ -265,7 +265,7 @@ def robot_move(servos_instance : Servos,
             if (FOLLOW_ACTION.MOTORS in follow_action):
                 if (FOLLOW_ACTION.SERVOS in follow_action):
                     #---
-                    if (i==4) : # Throw away every 4 frames.
+                    if (i==1) : # Throw away every 4 frames.
                         #---
                         omega = 0
                         # object left and looking left 
@@ -282,7 +282,7 @@ def robot_move(servos_instance : Servos,
                     #---
                     else : i+=1
                 else:
-                    if (i==4) : # Throw away every 4 frames.
+                    if (i==1) : # Throw away every 4 frames.
                         omega = -pido.pid(cX, data[0], data[3])
                         move_z = pidz.pid(40, data[2], data[3])
                         motors_instance.go(move_z,0.0,omega)
