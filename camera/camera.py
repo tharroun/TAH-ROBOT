@@ -39,7 +39,7 @@ class Camera:
         self.picam2.configure(config)
 
         cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
-        #cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         #cv2.setWindowProperty("Camera", cv2.WND_PROP_TOPMOST, 0)
         
         self.picam2.start()
