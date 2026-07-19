@@ -31,17 +31,17 @@ class PROCESS_ACTION(enum.Enum):
     LOST_OBJECT = 2
 
 class FOLLOW_ACTION(enum.Enum):
-    DRIVE = 1
-    SERVO = 2
-    MOTOR = 3
-    BOTH  = 4
+    DRIVE  = 1
+    SERVOS = 2
+    MOTORS = 3
+    BOTH   = 4
 
 # -----------------------------------
 async def event_loop(gamepad : Gamepad,
                      servos  : Servos):
     sx,sy=0,0
     async for event in gamepad.gamepad.async_read_loop() :
-        if event.code == evdev.ecodes.BTN_MODE and event.value == 0:
+        if event.code == evdev.ecodes.KEY_MENU and event.value == 0:
             gamepad.running = False
             break
 
@@ -227,10 +227,10 @@ def robot_move(servos_instance : Servos,
                vision_queue : type[multiprocessing.JoinableQueue],
                follow_action: FOLLOW_ACTION):
     
-    pidz = MyPID(60.0,0,0)
-    pido = MyPID(8.0,0,0)
-    pidx = MyPID(0.005,0.000,0.00)
-    pidy = MyPID(0.005,0.000,0.00)
+    pidz = MyPID(40.0,0,0)
+    pido = MyPID( 6.0,0,0)
+    pidx = MyPID(0.01,0.000,0.002)
+    pidy = MyPID(0.03,0.000,0.002)
 
     (width,height) = vision_queue.get()
     vision_queue.task_done()
@@ -250,7 +250,7 @@ def robot_move(servos_instance : Servos,
             pass
         else :
             #---------------------
-            if (follow_action==FOLLOW_ACTION.SERVO) or (follow_action==FOLLOW_ACTION.BOTH) :
+            if (follow_action==FOLLOW_ACTION.SERVOS) or (follow_action==FOLLOW_ACTION.BOTH) :
                 #---
                 move_x = pidx.pid(cX, data[0], data[3])
                 new_x = numpy.clip(servos_instance.servo0.angle + move_x, 1.0,179.0)
@@ -260,9 +260,9 @@ def robot_move(servos_instance : Servos,
                 new_y = numpy.clip(servos_instance.servo1.angle - move_y, 1.0,179.0)
                 servos_instance.servo1.angle = int(new_y)
                 #---
-            if (follow_action==FOLLOW_ACTION.MOTOR) or (follow_action==FOLLOW_ACTION.BOTH):
+            if (follow_action==FOLLOW_ACTION.MOTORS) or (follow_action==FOLLOW_ACTION.BOTH):
                 #---
-                if (i==2) :
+                if (i==4) :
                     #---
                     omega = 0
                     # object left and looking left 
@@ -292,17 +292,17 @@ if __name__ == "__main__":
     arguments   = sys.argv       # List of arguments   
     script_name = sys.argv[0]  # Name of the script   
     if (len(sys.argv) != 2) :
-        raise Exception("Please provide one argument (drive, servo, motor, both).") 
+        raise Exception("Please provide one argument (drive, servos, motors, both).") 
     if   (sys.argv[1].lower()=='drive') :
         follow_action = FOLLOW_ACTION.DRIVE
     elif   (sys.argv[1].lower()=='servos') :
-        follow_action = FOLLOW_ACTION.SERVO
+        follow_action = FOLLOW_ACTION.SERVOS
     elif (sys.argv[1].lower()=='motors') :
-        follow_action = FOLLOW_ACTION.MOTOR
+        follow_action = FOLLOW_ACTION.MOTORS
     elif (sys.argv[1].lower()=='both') :
         follow_action = FOLLOW_ACTION.BOTH
     else:
-        raise Exception("Please provide one argument (servo, motor, both).")
+        raise Exception("Please provide one argument (servos, motors, both).")
 
     my_servos  = Servos()
     my_servos.servo0.angle = 90
@@ -331,6 +331,7 @@ if __name__ == "__main__":
 
     my_servos.servo0.angle = 90
     my_servos.servo1.angle = 90
+    time.sleep(0.5)
     my_servos.deinit()
     my_motors.deinit()
     my_gamepad.deinit()
