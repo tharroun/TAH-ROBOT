@@ -4,7 +4,14 @@
 <img width="2362" height="892" alt="TAH-ROBOT drawio" src="https://github.com/user-attachments/assets/4034f403-4f1b-4354-bff3-2f42e2649780" />
 
 ## Servo control
-We are using the Adafruit library for the MZ996R servos on the PCA9685 16-channel board
+Adafruit library for the MZ996R servos on the PCA9685 16-channel board
+
+## Motors and control
+Yahboom 520 motors and the Yahboom 4-motor controller.
+
+## Power
+Yahboom 5V power control
+Two, 12V battery packs (One for the motor controler, one for the 5V Pi/Camera/display/servos)
 
 ## Seeting up github
 ```
@@ -36,14 +43,16 @@ pip3 install evdev
 ## To-do list
 
 ### Programming
-- Add `join`s for the two main JoinableQueues.
 
 ### Construction
+- Raise the camera
+- Build a protective top
+- Switch screens to the 5-inch LCD?
 
 ### Next steps
 - Motors
     - what is the deadtime for the 520 motor?
-    - calibrate the speed using the encoders
+    - Calibrate the speed using the encoders
 - Servos
     - how to find the max/min without collision of the servo?
     - how to more easily re-center the servos?
