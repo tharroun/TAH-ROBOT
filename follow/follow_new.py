@@ -219,7 +219,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
                     lineType = cv2.LINE_8)
         #-------------------------------
         cv2.imshow("Camera", frame)
-        time.sleep(0.08)
+        #time.sleep(0.08)
         #-------------------------------
         if cv2.waitKey(1)==ord('q'):
             break
@@ -238,8 +238,8 @@ def robot_move(servos_instance : Servos,
                vision_queue : type[multiprocessing.JoinableQueue],
                follow_action: FOLLOW_ACTION):
     
-    pidz = MyPID(35.0,0,0)
-    pido = MyPID( 6.0,0,0)
+    pidz = MyPID(40.0,0,0)
+    pido = MyPID( 4.0,0,0)
     pidx = MyPID(0.01,0.000,0.002)
     pidy = MyPID(0.03,0.000,0.002)
 
