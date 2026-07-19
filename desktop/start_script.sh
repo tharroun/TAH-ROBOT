@@ -35,7 +35,7 @@ esac
 exec 3>&1
 selection2=$(dialog \
   --backtitle "ROBOT CONTROL" \
-  --title "FUNCTION CHECKL" \
+  --title "FUNCTION CHECK" \
   --clear \
   --cancel-label "CANCEL" \
   --menu "MAKE A CHOICE:" 0 0 4 \

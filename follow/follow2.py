@@ -30,11 +30,11 @@ class PROCESS_ACTION(enum.Enum):
     KILL_THREAD = 1
     LOST_OBJECT = 2
 
-class FOLLOW_ACTION(enum.Enum):
-    DRIVE  = 1
-    SERVOS = 2
-    MOTORS = 3
-    BOTH   = 4
+class FOLLOW_ACTION(enum.Flag):
+    DRIVE  = enum.auto()
+    SERVOS = enum.auto()
+    MOTORS = enum.auto()
+
 
 # -----------------------------------
 async def event_loop(gamepad : Gamepad,
@@ -194,7 +194,8 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
                             lineType = cv2.LINE_8)
                 cv2.drawContours(frame,contours,0,(0,0,255),5)
                 tracking_queue.put((cx,cy,radius,dt))
-            else: tracking_queue.put(PROCESS_ACTION.LOST_OBJECT)   
+            else: 
+                tracking_queue.put(PROCESS_ACTION.LOST_OBJECT)   
         #-------------------------------
         if battery_queue.empty() == False : 
             volts = battery_queue.get() 
@@ -246,11 +247,11 @@ def robot_move(servos_instance : Servos,
             vision_queue.task_done()
             break
         elif data is PROCESS_ACTION.LOST_OBJECT:
-            motors_instance.stop()
+            if (FOLLOW_ACTION.MOTORS in follow_action) : motors_instance.stop()
             pass
         else :
             #---------------------
-            if (follow_action==FOLLOW_ACTION.SERVOS) or (follow_action==FOLLOW_ACTION.BOTH) :
+            if (FOLLOW_ACTION.SERVOS in follow_action) :
                 #---
                 move_x = pidx.pid(cX, data[0], data[3])
                 new_x = numpy.clip(servos_instance.servo0.angle + move_x, 1.0,179.0)
@@ -260,24 +261,32 @@ def robot_move(servos_instance : Servos,
                 new_y = numpy.clip(servos_instance.servo1.angle - move_y, 1.0,179.0)
                 servos_instance.servo1.angle = int(new_y)
                 #---
-            if (follow_action==FOLLOW_ACTION.MOTORS) or (follow_action==FOLLOW_ACTION.BOTH):
-                #---
-                if (i==4) :
+            if (FOLLOW_ACTION.MOTORS in follow_action):
+                if (FOLLOW_ACTION.SERVOS in follow_action):
                     #---
-                    omega = 0
-                    # object left and looking left 
-                    if new_x < 30 and servos_instance.servo0.angle < 45 :
+                    if (i==4) : # Throw away every 4 frames.
+                        #---
+                        omega = 0
+                        # object left and looking left 
+                        if new_x < 30 and servos_instance.servo0.angle < 45 :
+                            omega = -pido.pid(cX, data[0], data[3])
+                        # object right and looking right 
+                        if new_x > 150 and servos_instance.servo0.angle > 135 : 
+                            omega = -pido.pid(cX, data[0], data[3])
+                        #---
+                        move_z = pidz.pid(40, data[2], data[3])
+                        #---
+                        motors_instance.go(move_z,0.0,omega)
+                        i = 0
+                    #---
+                    else : i+=1
+                else:
+                    if (i==4) : # Throw away every 4 frames.
                         omega = -pido.pid(cX, data[0], data[3])
-                    # object right and looking right 
-                    if new_x > 150 and servos_instance.servo0.angle > 135 : 
-                        omega = -pido.pid(cX, data[0], data[3])
-                    #---
-                    move_z = pidz.pid(40, data[2], data[3])
-                    #---
-                    motors_instance.go(move_z,0.0,omega)
-                    i = 0
-                    #---
-                else : i+=1
+                        move_z = pidz.pid(40, data[2], data[3])
+                        motors_instance.go(move_z,0.0,omega)
+                        i = 0
+                    else : i+=1
             #---------------------
         #------
         vision_queue.task_done()
@@ -300,7 +309,7 @@ if __name__ == "__main__":
     elif (sys.argv[1].lower()=='motors') :
         follow_action = FOLLOW_ACTION.MOTORS
     elif (sys.argv[1].lower()=='both') :
-        follow_action = FOLLOW_ACTION.BOTH
+        follow_action = FOLLOW_ACTION.SERVOS | FOLLOW_ACTION.MOTORS
     else:
         raise Exception("Please provide one argument (servos, motors, both).")
 
