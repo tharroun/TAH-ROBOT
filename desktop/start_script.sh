@@ -64,21 +64,21 @@ case $selection2 in
     echo "JUST DRIVE"
     source /home/tah/.bashrc
     source /home/tah/GitHub/TAH-ROBOT/.venv/bin/activate
-    python3 /home/tah/GitHub/TAH-ROBOT/follow/follow_both_2.py drive
+    python3 /home/tah/GitHub/TAH-ROBOT/follow/follow.py drive
     ;;
   "B" )
     echo "FOLLOW WITH SERVOS ONLY"
     echo "JUST DRIVE"
     source /home/tah/.bashrc
     source /home/tah/GitHub/TAH-ROBOT/.venv/bin/activate
-    python3 /home/tah/GitHub/TAH-ROBOT/follow/follow_both_2.py servos
+    python3 /home/tah/GitHub/TAH-ROBOT/follow/follow.py servos
     ;;
   "C" )
     echo "FOLLOW WITH SERVOS ONLY"
     echo "JUST DRIVE"
     source /home/tah/.bashrc
     source /home/tah/GitHub/TAH-ROBOT/.venv/bin/activate
-    python3 /home/tah/GitHub/TAH-ROBOT/follow/follow_both_2.py motors
+    python3 /home/tah/GitHub/TAH-ROBOT/follow/follow.py motors
     ;;
   "D" )
     echo "FOLLOW WITH SERVOS AND MOTORS"
@@ -86,6 +86,6 @@ case $selection2 in
     echo "JUST DRIVE"
     source /home/tah/.bashrc
     source /home/tah/GitHub/TAH-ROBOT/.venv/bin/activate
-    python3 /home/tah/GitHub/TAH-ROBOT/follow/follow_both_2.py both
+    python3 /home/tah/GitHub/TAH-ROBOT/follow/follow.py both
     ;;
 esac
