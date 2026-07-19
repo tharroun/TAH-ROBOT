@@ -167,7 +167,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
 
         green_frame = cv2.bitwise_and(frame,frame,mask=color_mask)
         gray_frame = cv2.cvtColor(green_frame, cv2.COLOR_BGR2GRAY)
-        #gray_frame = cv2.medianBlur(gray_frame, 7)
+        #gray_frame = cv2.medianBlur(gray_frame, 7) #Doesn't seem to be needed.
 
         rows = gray_frame.shape[0]
         circles = cv2.HoughCircles(gray_frame, cv2.HOUGH_GRADIENT, 1, rows / 2,
@@ -176,10 +176,12 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
         
         if circles is not None:
             circles = numpy.uint16(numpy.around(circles))
-            #circles = sorted(circles, key=itemgetter(1), reverse=True)
-            i = circles[0][0]
+            # Assume only one circle found, mostly becuase I don't 
+            # know how to sort the results.
+            # circles = sorted(circles, key=itemgetter(1), reverse=True)
             #-------------------------------
-            cv2.circle(frame, (i[0], i[1]), i[2], (255, 0, 255), 3)    
+            cv2.circle(frame, (circles[0][0][0], circles[0][0][1]), 
+                       circles[0][0][2], (255, 0, 255), 3)    
             #-------------------------------
             t2 = time.perf_counter()
             dt = t2-t1
