@@ -8,7 +8,8 @@ import cv2
 import numpy
 import yaml
 import os.path 
-import enum 
+import enum
+from operator import itemgetter
 
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 sys.path.append('/home/tah/GitHub/TAH-ROBOT/servos')
@@ -175,10 +176,11 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
         
         if circles is not None:
             circles = numpy.uint16(numpy.around(circles))
-            circles = sorted(circles, key=lambda x: circles[2], reverse=True)
+            circles = sorted(circles, key=itemgetter(2), reverse=True)
             i = circles[0]
+            #-------------------------------
             cv2.circle(frame, (i[0], i[1]), i[2], (255, 0, 255), 3)    
-            
+            #-------------------------------
             t2 = time.perf_counter()
             dt = t2-t1
             fps = numpy.round(1/dt,1)
@@ -190,7 +192,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
                         color = (255, 0, 0), 
                         thickness = 2, 
                         lineType = cv2.LINE_8)
-            
+            #-------------------------------
             tracking_queue.put((i[0],i[1],i[2],dt))
         else: 
             tracking_queue.put(PROCESS_ACTION.LOST_OBJECT)   
