@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-# coding=utf8
 import sys
 sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 import time
