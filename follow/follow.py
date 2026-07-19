@@ -195,7 +195,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
                         thickness = 2, 
                         lineType = cv2.LINE_8)
             #-------------------------------
-            tracking_queue.put((i[0],i[1],i[2],dt))
+            tracking_queue.put((circles[0][0][0],circles[0][0][1],circles[0][0][2],dt))
         else: 
             tracking_queue.put(PROCESS_ACTION.LOST_OBJECT)   
         #-------------------------------
