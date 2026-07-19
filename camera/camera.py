@@ -45,7 +45,7 @@ class Camera:
 
 # ------------------------------------------
 def view(my_camera : Camera):
-    
+
     fps = "0.0 FPS"
     t1 = time.perf_counter() 
     while True:
@@ -72,9 +72,56 @@ def view(my_camera : Camera):
     cv2.destroyAllWindows()
 # ------------------------------------------
 
+# ------------------------------------------
+def follow(my_camera : Camera):
+    
+    fps = "0.0 FPS"
+    t1 = time.perf_counter() 
+    while True:
+        im  = my_camera.picam2.capture_array()
+        #frame = cv2.resize(im,(596,324),interpolation = cv2.INTER_CUBIC)
+        frame = cv2.resize(im,(800,480),interpolation = cv2.INTER_CUBIC)
+        #-------------------------------
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.medianBlur(gray, 5)
+
+        rows = gray.shape[0]
+        circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, rows / 8,
+                               param1=100, param2=30,
+                               minRadius=5, maxRadius=100)
+        
+        if circles is not None:
+            circles = numpy.uint16(numpy.around(circles))
+            for i in circles[0, :]:
+                center = (i[0], i[1])
+                # circle center
+                cv2.circle(frame, center, 1, (0, 100, 100), 3)
+                # circle outline
+                radius = i[2]
+                cv2.circle(frame, center, radius, (255, 0, 255), 3)
+        #-------------------------------
+        t2 = time.perf_counter()
+        fps = numpy.round(1/(t2-t1),1)
+        t1 = t2
+        cv2.putText(frame, str(fps)+" FPS", 
+                    org = (40,70), 
+                    fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
+                    fontScale = 1, 
+                    color = (255, 0, 0), 
+                    thickness = 2, 
+                    lineType = cv2.LINE_8)
+            #-------------------------------
+        cv2.imshow("Camera", frame)
+            #-------------------------------
+        if cv2.waitKey(1)==ord('q'):
+            break
+            #-------------------------------
+    cv2.destroyAllWindows()
+# ------------------------------------------
+
 
 if __name__ == "__main__":
     my_camera = Camera()
-    view(my_camera)
+    follow(my_camera)
     my_camera.deinit()
 
