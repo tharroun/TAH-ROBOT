@@ -219,7 +219,7 @@ def robot_see(battery_queue  : type[multiprocessing.JoinableQueue],
                     lineType = cv2.LINE_8)
         #-------------------------------
         cv2.imshow("Camera", frame)
-        #time.sleep(0.08)
+        time.sleep(0.05)
         #-------------------------------
         if cv2.waitKey(1)==ord('q'):
             break
