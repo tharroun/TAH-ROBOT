@@ -7,9 +7,8 @@ import threading
 import math
 import collections
 import multiprocessing
-from   enum import Enum
 from   enum import IntEnum
-
+import numpy
 
 class EncoderMode(IntEnum):
     NOTHING  = 0
@@ -21,6 +20,7 @@ class RobotFrame(IntEnum):
     WIDTH          = 476 # mm
     LENGTH         = 334 # mm
     WHEEL_DIAMETER = 97 #mm
+
 
 class Motors:
     """
@@ -61,24 +61,36 @@ class Motors:
             self.recv_buffer    = ""
             self.queue_battery  = multiprocessing.Queue(maxsize=1)
             self.queue_battery.put('Unk')
-            #self.queue_battery  = collections.deque(maxlen=1)
-            #self.queue_battery.append('Unk')
+            self.speed  = collections.deque(maxlen=10)
             if self.log: self.logger.info("Started listening to serial port.")
 
         self.set_motor_type(1)
+        time.sleep(0.1)
         self.set_motor_deadzone(1500)
+        time.sleep(0.1)
         self.set_pulse_phase(30)
+        time.sleep(0.1)
         self.set_pulse_line(11)
+        time.sleep(0.1)
         self.set_wheel_diam(95)
+        time.sleep(0.1)
+        self.set_pid()
+        time.sleep(0.1)
         self.send_upload_command(EncoderMode.NOTHING)
         #self.send_data("$upload:0,0,0#")
-        self.control_pwm(0,0,0,0)
+        time.sleep(0.1)
+        
         self.send_data("$read_flash#")
+        time.sleep(0.1)
         if self.log: self.logger.info("Initialized motor parameters.")
 
         self.W = RobotFrame.WIDTH//2
         self.L = RobotFrame.LENGTH//2
         self.wheel_diameter = RobotFrame.WHEEL_DIAMETER
+        self.c = [1.0,1.0,1.0,1.0]
+        self.calibrated = False
+        self.control_pwm(0,0,0,0)
+        time.sleep(0.1)
         return
 # -----------------------------------
 
@@ -113,7 +125,11 @@ All other data is shunted to log.
             if self.port.in_waiting > 0:
                 self.recv_buffer = self.port.read(self.port.in_waiting).decode().rstrip()
                 if self.recv_buffer.startswith('$M'):
-                    print(self.recv_buffer)
+                    start = self.recv_buffer.index( ':' ) + 1
+                    end   = self.recv_buffer.find( '#', start )
+                    if (end != -1):
+                        self.speed.append(self.recv_buffer[start:end])
+                        #print(self.recv_buffer)
                 elif self.recv_buffer.startswith('$B'):
                     try:
                         start = self.recv_buffer.index( ':' ) + 1
@@ -128,7 +144,7 @@ All other data is shunted to log.
                 else:
                     if self.log: self.logger.info(self.recv_buffer)
             else:
-                time.sleep(0.01)
+                time.sleep(0.05)
         return
 # -----------------------------------
 
@@ -158,6 +174,12 @@ All other data is shunted to log.
         self.port.write(data.encode())  
         self.port.flush()
         time.sleep(0.02)
+        return
+# -----------------------------------
+
+# -----------------------------------
+    def set_pid(self, P: float=0.8, I: float=0.001, D: float=0.005):
+        self.send_data("$mpid:{},{},{}#".format(P,I,D))
         return
 # -----------------------------------
 
@@ -212,7 +234,17 @@ All other data is shunted to log.
 
 # -----------------------------------
     def control_pwm(self, m1: int=0, m2: int=0, m3: int=0, m4: int=0):
-        self.send_data("$pwm:{},{},{},{}#".format(m1, m2, m3, m4))
+        '''
+        Current configuration (and orientation to positive polarity):
+        m4 : m4 : m2 : m1
+        back-right (-) : back-left (+) : front-right (+)  : front-left (-) 
+        '''
+        if (self.calibrated):
+            m1 = numpy.floor(m1*self.c[3])
+            m2 = numpy.floor(m2*self.c[2])
+            m3 = numpy.floor(m3*self.c[1])
+            m4 = numpy.floor(m4*self.c[0])
+        self.send_data("$pwm:{},{},{},{}#".format(-m1, m2, m3, -m4))
         return
 # -----------------------------------
 
@@ -229,9 +261,9 @@ All other data is shunted to log.
            angular_rate: float=0):
         """
         Use polar coordinates to control moving
-        motor1 v1 (-)|  ↑  |v3 (+) motor2
-                     |     |
-        motor3 v3 (+)|     |v1 (-) motor4
+        motor4 vfl (-)|  ↑  |vfr (+) motor3
+                      |     |
+        motor2 vbl (+)|     |vbr (-) motor1
         :param velocity: mm/s
         :param direction: Moving direction 0~360deg, 90deg<--- ↑ ---> 270deg
         :param angular_rate:  The speed at which the chassis rotates
@@ -241,49 +273,99 @@ All other data is shunted to log.
         vx = velocity * math.cos(direction * rad_per_deg)
         vy = velocity * math.sin(direction * rad_per_deg)
         vp = angular_rate # * (self.W + self.L)
-        v1 = int(vx - vy + vp)
-        v2 = int(vx + vy - vp)
-        v3 = int(vx + vy + vp)
-        v4 = int(vx - vy - vp)
-        self.control_pwm(-v4, v3, v2, -v1)
+        vbr = int(vx - vy + vp)
+        vbl = int(vx + vy - vp)
+        vfr = int(vx + vy + vp)
+        vfl = int(vx - vy - vp)
+        self.control_pwm(vbr, vbl, vfr, vfl)
         return
 # -----------------------------------
-# -----------------------------------
 
+# -----------------------------------
+    def calibrate(self):
+        # ----------------
+        if self.log: 
+            self.logger.info("Old calibration:{},{},{},{}".format(self.c[0],self.c[1],self.c[2],self.c[3]))
+        # ----------------
+        ### GATHER CALIBRATION DATA
+        self.send_upload_command(EncoderMode.NOTHING)
+        self.go(1000.0, 0, 0)
+        time.sleep(1)
+        self.send_upload_command(EncoderMode.SPEED)
+        time.sleep(3)
+        self.send_upload_command(EncoderMode.NOTHING)
+        time.sleep(1)
+        self.send_data("$pwm:0,0,0,0#")
+        time.sleep(1)
+    
+        fl = numpy.zeros(self.speed.maxlen)
+        fr = numpy.zeros(self.speed.maxlen)
+        bl = numpy.zeros(self.speed.maxlen)
+        br = numpy.zeros(self.speed.maxlen)
+
+        for i in range(self.speed.maxlen):
+            fl[i] = float(self.speed[i].split(',')[3])
+            fr[i] = float(self.speed[i].split(',')[2])
+            bl[i] = float(self.speed[i].split(',')[1])
+            br[i] = float(self.speed[i].split(',')[0])
+        
+        scalefl = 1000.0/numpy.fabs(numpy.average(fl))
+        scalefr = 1000.0/numpy.fabs(numpy.average(fr))
+        scalebl = 1000.0/numpy.fabs(numpy.average(bl))
+        scalebr = 1000.0/numpy.fabs(numpy.average(br))
+        self.c = [scalefl, scalefr, scalebl, scalebr]
+        # ----------------
+        if self.log: 
+            self.logger.info("New calibration:{},{},{},{}".format(self.c[0],self.c[1],self.c[2],self.c[3]))
+        self.calibrated = True
+        # ----------------
+        return
+
+
+# -----------------------------------
 if __name__ == "__main__":
 
     motors = Motors(log=True)
-    print(motors.get_battery())
+    motors.calibrate()
 
     
-    motors.control_pwm(-1200, 0, 0, 0)
+    ## MOTOR NUMBERS
+    motors.control_pwm(1200, 0, 0, 0)
     time.sleep(1)
     motors.control_pwm(0, 1200, 0, 0)
     time.sleep(1)
     motors.control_pwm(0, 0, 1200, 0)
     time.sleep(1)
-    motors.control_pwm(0, 0, 0, -1200)
+    motors.control_pwm(0, 0, 0, 1200)
     time.sleep(1)
     motors.control_pwm(0, 0, 0, 0)
+    
 
-    '''
-    motors.send_upload_command(EncoderMode.SPEED)
-    motors.go(350.0, 0.0, 0.0)
+    ## FORWARD > BACKWARD > LEFT > RIGHT > SPIN LEFT
+    motors.send_upload_command(EncoderMode.NOTHING)
+    motors.go(500.0,   0.0, 0)
     time.sleep(2)
-    motors.go(850.0, 180.0, 0.0)
+    motors.go(500.0, 180.0, 0)
     time.sleep(2)
-    motors.go(0.0, 0.0, 300)
+    motors.go(500.0,  90.0, 0)
     time.sleep(2)
-    motors.go(0.0, 0.0, -800)
+    motors.go(500.0, 270.0, 0)
+    time.sleep(2)
+    motors.go(0.0, 0.0, 1000.0)
     time.sleep(2)
     motors.stop()
     time.sleep(0.5)
-    '''
-
-    v = 1000
-    while v < 1800 :
-        motors.go(v, 180.0, 0.0)
-        time.sleep(0.5)
-        v += 100
+    
+    motors.send_upload_command(EncoderMode.NOTHING)
+    motors.go(1000.0, 0, 0)
+    time.sleep(1)
+    motors.send_upload_command(EncoderMode.SPEED)
+    time.sleep(3)
+    motors.send_upload_command(EncoderMode.NOTHING)
+    time.sleep(1)
+    motors.stop()
+    print(motors.speed)
+    
+    # ---------------------
     motors.stop()
     motors.deinit()

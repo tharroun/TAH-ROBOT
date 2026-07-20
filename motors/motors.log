@@ -1,0 +1,31 @@
+INFO:__main__:Opened serial port.
+INFO:__main__:Started listening to serial port.
+INFO:__main__:Set mtype:OK!
+INFO:__main__:Set deadzone:OK!
+INFO:__main__:Set mphase:OK!
+INFO:__main__:Set mline:OK!
+INFO:__main__:Set wdiameter:OK!
+INFO:__main__:Set MPID:OK!
+INFO:__main__:read_flash:OK!
+Motor_Version:1.7.3
+Motor_type:1
+Dead_Zone:1500
+Pulse_Line:11
+Pulse_Phase:30
+wheel_diameter:95.000
+P:0.800	 I:0.001	 D:0.005
+INFO:__main__:Initialized motor parameters.
+INFO:__main__:Old calibration:1.0,1.0,1.0,1.0
+INFO:__main__:.01#
+INFO:__main__:.01#
+INFO:__main__:.62#
+INFO:__main__:.62#
+INFO:__main__:.84#
+INFO:__main__:New calibration:1.026176742525072,1.1458087461873216,1.0455843404924492,1.1458087461873216
+INFO:__main__:4.84#
+$MSPD:-1017.45,972.23,1040.06,-972.23#
+INFO:__main__:94.84#
+INFO:__main__:017.45#
+INFO:__main__:040.06#
+INFO:__main__:Stopped listening thread.
+INFO:__main__:Closed serial port.
