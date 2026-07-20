@@ -43,6 +43,7 @@ pip3 install evdev
 ## To-do list
 
 ### Programming
+- Save motor encoder calibration to a yaml file
 
 ### Construction
 - Raise the camera
@@ -52,7 +53,6 @@ pip3 install evdev
 ### Next steps
 - Motors
     - what is the deadtime for the 520 motor?
-    - Calibrate the speed using the encoders
 - Servos
     - how to find the max/min without collision of the servo?
     - how to more easily re-center the servos?
