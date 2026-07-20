@@ -297,18 +297,17 @@ All other data is shunted to log.
         time.sleep(1)
         self.send_data("$pwm:0,0,0,0#")
         time.sleep(1)
-    
+        # ----------------
+        ###  CALCULATE THE SCALE FACOTRS
         fl = numpy.zeros(self.speed.maxlen)
         fr = numpy.zeros(self.speed.maxlen)
         bl = numpy.zeros(self.speed.maxlen)
         br = numpy.zeros(self.speed.maxlen)
-
         for i in range(self.speed.maxlen):
             fl[i] = float(self.speed[i].split(',')[3])
             fr[i] = float(self.speed[i].split(',')[2])
             bl[i] = float(self.speed[i].split(',')[1])
             br[i] = float(self.speed[i].split(',')[0])
-        
         scalefl = 1000.0/numpy.fabs(numpy.average(fl))
         scalefr = 1000.0/numpy.fabs(numpy.average(fr))
         scalebl = 1000.0/numpy.fabs(numpy.average(bl))
