@@ -71,8 +71,8 @@ async def drive_loop(gamepad : Gamepad,
             
         rcw  = gamepad.gamepad.absinfo(evdev.ecodes.ABS_RZ).value
         rccw = gamepad.gamepad.absinfo(evdev.ecodes.ABS_Z).value
-        if rcw == 1023 and rccw == 0   : omega = -gamepad.rotation_speed
-        elif rcw == 0 and rccw == 1023 : omega = gamepad.rotation_speed
+        if rcw == 1023 and rccw == 0   : omega = gamepad.rotation_speed
+        elif rcw == 0 and rccw == 1023 : omega = -gamepad.rotation_speed
         else : omega = 0
 
         speed_x = gamepad.motors_mx*math.fabs(mx)+gamepad.motors_bx
