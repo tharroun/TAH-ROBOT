@@ -85,8 +85,8 @@ async def drive_loop(gamepad : Gamepad,
             
         rcw  = gamepad.gamepad.absinfo(evdev.ecodes.ABS_RZ).value
         rccw = gamepad.gamepad.absinfo(evdev.ecodes.ABS_Z).value
-        if rcw == 1023 and rccw == 0   : omega = gamepad.rotation_speed
-        elif rcw == 0 and rccw == 1023 : omega = -gamepad.rotation_speed
+        if rcw == 1023 and rccw == 0   : omega = -gamepad.rotation_speed
+        elif rcw == 0 and rccw == 1023 : omega = gamepad.rotation_speed
         else : omega = 0
 
         speed_x = gamepad.motors_mx*math.fabs(mx)+gamepad.motors_bx
@@ -279,17 +279,17 @@ def robot_move(servos_instance : Servos,
                     omega = 0
                     # object left and looking left 
                     if new_x < 30 and servos_instance.servo0.angle < 45 :
-                        omega = -pido.pid(cX, data[0], data[3])
+                        omega = pido.pid(cX, data[0], data[3])
                     # object right and looking right 
                     if new_x > 150 and servos_instance.servo0.angle > 135 : 
-                        omega = -pido.pid(cX, data[0], data[3])
+                        omega = pido.pid(cX, data[0], data[3])
                     #---
                     move_z = pidz.pid(40, data[2], data[3])
                     #---
                     motors_instance.go(move_z,0.0,omega)
                     #---
                 else:
-                    omega = -pido.pid(cX, data[0], data[3])
+                    omega = pido.pid(cX, data[0], data[3])
                     move_z = pidz.pid(40, data[2], data[3])
                     motors_instance.go(move_z,0.0,omega)
             #---------------------
