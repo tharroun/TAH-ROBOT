@@ -1,4 +1,5 @@
 import sys
+sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 import cv2
 import time
 import pprint
@@ -6,8 +7,6 @@ import yaml
 import os.path 
 from   picamera2 import Picamera2
 import numpy
-
-sys.path.append('/home/tah/GitHub/TAH-ROBOT')
 
 small_kernel   = numpy.ones((3, 3), numpy.uint8)
 medium_kernel  = numpy.ones((6, 6), numpy.uint8)
@@ -84,7 +83,7 @@ def follow(my_camera : Camera):
     # ------
     calbiration_filename = '/home/tah/GitHub/TAH-ROBOT/color_correction/calibration.yaml' 
     if os.path.exists(calbiration_filename) == False:
-        raise FileNotFoundError("calibration.yaml does nto exist.")
+        raise FileNotFoundError("color calibration.yaml does not exist.")
     with open(calbiration_filename,'r') as file:
         color_range = yaml.safe_load(file)
     COLOR_MIN = numpy.array(color_range['hsv']['min'],numpy.uint8)

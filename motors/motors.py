@@ -9,6 +9,8 @@ import collections
 import multiprocessing
 from   enum import IntEnum
 import numpy
+import yaml
+import os
 
 class EncoderMode(IntEnum):
     NOTHING  = 0
@@ -21,6 +23,7 @@ class RobotFrame(IntEnum):
     LENGTH         = 334 # mm
     WHEEL_DIAMETER = 97 #mm
 
+calbiration_filename = '/home/tah/GitHub/TAH-ROBOT/motors/calibration.yaml' 
 
 class Motors:
     """
@@ -31,6 +34,7 @@ class Motors:
         self, 
         device: str = "/dev/ttyUSB0", 
         enable_recv: bool = True,
+        calibrate: bool = False,
         log: bool = False,
         logfile: str = "motors.log"
     ):
@@ -88,7 +92,18 @@ class Motors:
         self.L = RobotFrame.LENGTH//2
         self.wheel_diameter = RobotFrame.WHEEL_DIAMETER
         self.c = [1.0,1.0,1.0,1.0]
-        self.calibrated = False
+        self.calibrated = calibrate
+        if (calibrate):
+             # ------
+            if os.path.exists(calbiration_filename) == False:
+                raise FileNotFoundError("motor calibration.yaml does not exist.")
+            with open(calbiration_filename,'r') as file:
+                data = yaml.safe_load(file)
+                self.c[0] = data['fl'][0]
+                self.c[1] = data['fr'][0]
+                self.c[2] = data['bl'][0]
+                self.c[3] = data['br'][0]
+        # ------
         self.control_pwm(0,0,0,0)
         time.sleep(0.1)
         return
@@ -129,7 +144,7 @@ All other data is shunted to log.
                     end   = self.recv_buffer.find( '#', start )
                     if (end != -1):
                         self.speed.append(self.recv_buffer[start:end])
-                        #print(self.recv_buffer)
+                        # print(self.recv_buffer)
                 elif self.recv_buffer.startswith('$B'):
                     try:
                         start = self.recv_buffer.index( ':' ) + 1
@@ -316,6 +331,10 @@ All other data is shunted to log.
         # ----------------
         if self.log: 
             self.logger.info("New calibration:{},{},{},{}".format(self.c[0],self.c[1],self.c[2],self.c[3]))
+        data = {'fl' : [float(scalefl)], 'fr' : [float(scalefr)], 'bl' : [float(scalebl)], 'br' : [float(scalebr)]}
+        with open(calbiration_filename,'w') as file:
+            yaml.dump(data,file)
+        time.sleep(0.5)
         self.calibrated = True
         # ----------------
         return
@@ -324,8 +343,8 @@ All other data is shunted to log.
 # -----------------------------------
 if __name__ == "__main__":
 
-    motors = Motors(log=True)
-    motors.calibrate()
+    motors = Motors(log=True, calibrate=True)
+    #motors.calibrate()
 
     
     ## MOTOR NUMBERS

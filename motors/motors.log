@@ -15,9 +15,8 @@ Pulse_Phase:30
 wheel_diameter:95.000
 P:0.800	 I:0.001	 D:0.005
 INFO:__main__:Initialized motor parameters.
-INFO:__main__:Old calibration:1.0,1.0,1.0,1.0
-INFO:__main__:New calibration:1.0480620285030948,1.1282708572150666,1.0840249412458483,1.1428480000731422
-INFO:__main__:1040.06#
-INFO:__main__:1040.06#
+INFO:__main__:017.45#
+INFO:__main__:017.45#
+INFO:__main__:017.45#
 INFO:__main__:Stopped listening thread.
 INFO:__main__:Closed serial port.

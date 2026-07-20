@@ -35,10 +35,10 @@ class Camera:
         self.picam2.configure(config)
 
         cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)
-        cv2.createTrackbar("LH", 'Camera', 80, 255, self.nothing)   # OpenCV hue max = 179
-        cv2.createTrackbar("LS", 'Camera', 80, 255, self.nothing)
-        cv2.createTrackbar("LV", 'Camera', 80, 255, self.nothing)
-        cv2.createTrackbar("UH", 'Camera', 140, 255, self.nothing)
+        cv2.createTrackbar("LH", 'Camera', 60, 255, self.nothing)   # OpenCV hue max = 179
+        cv2.createTrackbar("LS", 'Camera', 60, 255, self.nothing)
+        cv2.createTrackbar("LV", 'Camera', 60, 255, self.nothing)
+        cv2.createTrackbar("UH", 'Camera', 115, 255, self.nothing)
         cv2.createTrackbar("US", 'Camera', 255, 255, self.nothing)
         cv2.createTrackbar("UV", 'Camera', 255, 255, self.nothing)
         #cv2.setWindowProperty("Camera", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
@@ -72,26 +72,37 @@ class Camera:
             frame_hsv  = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
             color_mask = cv2.inRange(frame_hsv, l_b, u_b)
             color_mask = cv2.morphologyEx(color_mask, cv2.MORPH_CLOSE, small_kernel, iterations = 1)
-            color_mask = cv2.morphologyEx(color_mask, cv2.MORPH_OPEN,  small_kernel, iterations = 1)
+            color_mask = cv2.morphologyEx(color_mask, cv2.MORPH_OPEN,  small_kernel, iterations = 7)
 
-            contours,hierarchy = cv2.findContours(color_mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-            if (contours):
+            green_frame = cv2.bitwise_and(frame,frame,mask=color_mask)
+            gray_frame = cv2.cvtColor(green_frame, cv2.COLOR_BGR2GRAY)
+
+            rows = gray_frame.shape[0]
+            circles = cv2.HoughCircles(gray_frame, cv2.HOUGH_GRADIENT, 1, rows / 2,
+                               param1=300, param2=12,
+                               minRadius=5, maxRadius=150)
+            if circles is not None:
+                circles = numpy.uint16(numpy.around(circles))
+                # Assume only one circle found, mostly becuase I don't 
+                # know how to sort the results.
+                # circles = sorted(circles, key=itemgetter(1), reverse=True)
+                #-------------------------------
+                cv2.circle(frame, (circles[0][0][0], circles[0][0][1]), 
+                                   circles[0][0][2], (255, 0, 255), 3)    
+                #-------------------------------
                 t2 = time.perf_counter()
-                if (len(contours)>1) : 
-                    contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
-                # ------------------------------------------------
-                #area = cv2.contourArea(contours[0])
-                #arclength = cv2.arcLength(contours[0],True)
-                #circularity = 4*numpy.pi*area/(arclength*arclength)
-                # NEXT TIME:https://docs.opencv.org/4.11.0/d4/d70/tutorial_hough_circle.html
-                # ------------------------------------------------
-                M = cv2.moments(contours[0])
-                cx = int(M['m10']/M['m00'])
-                cy = int(M['m01']/M['m00'])
-                radius = int(numpy.sqrt(M['m00']/numpy.pi))
-                if radius > 10:
-                    cv2.drawContours(frame,contours,0,(0,0,255),5)
+                dt = t2-t1
+                fps = numpy.round(1/dt,1)
                 t1 = t2
+                cv2.putText(frame, str(fps)+" FPS", 
+                            org = (40,100), 
+                            fontFace = cv2.FONT_HERSHEY_SIMPLEX, 
+                            fontScale = 1, 
+                            color = (255, 0, 0), 
+                            thickness = 2, 
+                            lineType = cv2.LINE_8)
+
+            
             cv2.imshow("Camera", frame)
 
             if cv2.waitKey(1)==ord('q'):
